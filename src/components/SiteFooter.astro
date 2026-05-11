@@ -1,0 +1,56 @@
+---
+import { ArrowUp, GitBranch, Mail, Rss } from '@lucide/astro';
+import { site } from '../data/site';
+
+const icons = { github: GitBranch, mail: Mail, rss: Rss };
+---
+
+<footer class="border-t border-[var(--line)]">
+  <div class="page-wrap flex flex-col gap-5 py-8 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p class="font-medium">{site.shortTitle}</p>
+      <p class="mt-1 text-sm text-[var(--muted)]">Powered by Astro, Markdown and Pagefind.</p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      {
+        site.social.map((item) => {
+          const Icon = icons[item.icon as keyof typeof icons];
+          return (
+            <a
+              href={item.href}
+              class="focus-ring inline-flex h-10 items-center gap-2 rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 text-sm text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              target={item.href.startsWith('http') ? '_blank' : undefined}
+              rel={item.href.startsWith('http') ? 'noreferrer' : undefined}
+            >
+              <Icon class="h-4 w-4" aria-hidden="true" />
+              {item.label}
+            </a>
+          );
+        })
+      }
+    </div>
+  </div>
+</footer>
+
+<button type="button" class="back-to-top" aria-label="回到顶部" data-back-to-top>
+  <ArrowUp class="h-5 w-5" aria-hidden="true" />
+</button>
+
+<script>
+  const btn = document.querySelector('[data-back-to-top]');
+
+  if (btn) {
+    const toggle = () => {
+      const show = window.scrollY > 400;
+      btn.classList.toggle('visible', show);
+    };
+
+    window.addEventListener('scroll', toggle, { passive: true });
+    toggle();
+
+    btn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+</script>

@@ -1,0 +1,64 @@
+---
+import { ArrowLeft, ExternalLink, GitBranch } from '@lucide/astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project }
+  }));
+}
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { Content } = await project.render();
+---
+
+<BaseLayout title={project.data.title} description={project.data.description} image={project.data.cover ?? '/images/og.svg'}>
+  <article class="page-wrap max-w-4xl pb-16 pt-10">
+    <a href="/projects/" class="focus-ring animate-fade-up inline-flex items-center gap-2 rounded-md text-sm text-[var(--muted)] transition hover:text-[var(--accent)]">
+      <ArrowLeft class="h-4 w-4" aria-hidden="true" />
+      返回项目
+    </a>
+
+    <header class="animate-fade-up mt-8">
+      <span class="chip">{project.data.status}</span>
+      <h1 class="mt-5 text-4xl font-semibold tracking-normal sm:text-5xl">{project.data.title}</h1>
+      <p class="mt-4 text-base leading-7 text-[var(--muted)]">{project.data.description}</p>
+      <p class="mt-4 text-sm text-[var(--muted)]">{formatDate(project.data.date)} · {project.data.role}</p>
+      <div class="mt-5 flex flex-wrap gap-2">
+        {project.data.stack.map((item) => <span class="chip">{item}</span>)}
+      </div>
+      <div class="mt-6 flex flex-wrap gap-3">
+        {
+          project.data.demo && (
+            <a href={project.data.demo} class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm transition hover:border-[var(--accent)] hover:text-[var(--accent)]" target="_blank" rel="noreferrer">
+              <ExternalLink class="h-4 w-4" aria-hidden="true" />
+              Demo
+            </a>
+          )
+        }
+        {
+          project.data.repo && (
+            <a href={project.data.repo} class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm transition hover:border-[var(--accent)] hover:text-[var(--accent)]" target="_blank" rel="noreferrer">
+              <GitBranch class="h-4 w-4" aria-hidden="true" />
+              Code
+            </a>
+          )
+        }
+      </div>
+    </header>
+
+    {project.data.cover && <img src={project.data.cover} alt="" class="animate-fade-up mt-8 aspect-[16/9] w-full rounded-lg border border-[var(--line)] object-cover" />}
+
+    <div class="prose mt-10 max-w-none">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

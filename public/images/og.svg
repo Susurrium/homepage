@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title">
+  <title id="title">Personal homepage open graph image</title>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f7f8fb" />
+      <stop offset="0.5" stop-color="#e7f6f3" />
+      <stop offset="1" stop-color="#fff0f3" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <rect x="76" y="76" width="1048" height="478" rx="34" fill="#fff" fill-opacity="0.78" stroke="#d9e1e7" />
+  <text x="126" y="240" font-family="Inter, Arial, sans-serif" font-size="76" font-weight="800" fill="#1d1d20">你的名字</text>
+  <text x="126" y="318" font-family="Inter, Arial, sans-serif" font-size="34" fill="#666c73">个人主页 · 博客 · 项目 · 成果</text>
+  <rect x="126" y="384" width="198" height="18" rx="9" fill="#0f766e" />
+  <rect x="348" y="384" width="198" height="18" rx="9" fill="#4338ca" />
+  <rect x="570" y="384" width="198" height="18" rx="9" fill="#be123c" />
+</svg>

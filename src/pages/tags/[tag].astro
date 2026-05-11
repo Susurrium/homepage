@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import PostCard from '../../components/PostCard.astro';
+import PageHero from '../../components/PageHero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { allTags, published, sortByDate } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const posts = published(await getCollection('blog'));
+  return allTags(posts).map((tag) => ({
+    params: { tag: encodeURIComponent(tag.name) },
+    props: { tag: tag.name, posts: posts.filter((post) => post.data.tags.includes(tag.name)) }
+  }));
+}
+
+const { tag, posts } = Astro.props;
+const sortedPosts = sortByDate(posts);
+---
+
+<BaseLayout title={`标签：${tag}`} description={`浏览标签 ${tag} 下的文章。`}>
+  <PageHero eyebrow="Tag" title={`#${tag}`} description={`${sortedPosts.length} 篇文章`} />
+  <section class="page-wrap grid gap-4 pb-16">
+    {sortedPosts.map((post, i) => <div class="reveal" style={`animation-delay: ${i * 0.06}s`}><PostCard post={post} /></div>)}
+  </section>
+</BaseLayout>

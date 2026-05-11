@@ -1,0 +1,28 @@
+---
+import { Moon, Sun } from '@lucide/astro';
+---
+
+<button
+  type="button"
+  data-theme-toggle
+  class="focus-ring inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[var(--line)] bg-[var(--surface)] text-[var(--text)] transition hover:border-[var(--accent)]"
+  aria-label="切换深色模式"
+  title="切换深色模式"
+>
+  <Sun class="h-4 w-4 dark:hidden" aria-hidden="true" />
+  <Moon class="hidden h-4 w-4 dark:block" aria-hidden="true" />
+</button>
+
+<script>
+  const applyTheme = (theme: string) => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('theme', theme);
+  };
+
+  document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+      applyTheme(next);
+    });
+  });
+</script>

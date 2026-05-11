@@ -1,0 +1,105 @@
+---
+import { Menu, Search } from '@lucide/astro';
+import { site } from '../data/site';
+import ThemeToggle from './ThemeToggle.astro';
+
+const currentPath = Astro.url.pathname;
+const isActive = (href: string) => (href === '/' ? currentPath === '/' : currentPath.startsWith(href));
+---
+
+<header class="sticky top-0 z-40 border-b border-[var(--line)] bg-[color-mix(in_srgb,var(--bg)_82%,transparent)] backdrop-blur-xl">
+  <div class="page-wrap flex min-h-16 items-center gap-4 py-3">
+    <a href="/" class="focus-ring flex shrink-0 items-center gap-3 rounded-md transition-opacity hover:opacity-80" aria-label="返回首页">
+      <img src={site.avatar} alt="" class="h-10 w-10 rounded-md border border-[var(--line)] bg-[var(--surface)]" />
+      <span class="hidden font-semibold sm:inline">{site.shortTitle}</span>
+    </a>
+
+    <nav class="hidden min-w-0 flex-1 items-center gap-1 px-1 md:flex" aria-label="主导航">
+      {
+        site.nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'focus-ring link-underline shrink-0 rounded-md px-3 py-2 text-sm transition-colors',
+              isActive(item.href)
+                ? 'font-medium text-[var(--text)]'
+                : 'text-[var(--muted)] hover:text-[var(--text)]'
+            ]}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="flex shrink-0 items-center gap-2">
+      <a
+        href="/search/"
+        class="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-md border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+        aria-label="搜索"
+        title="搜索"
+      >
+        <Search class="h-4 w-4" aria-hidden="true" />
+      </a>
+      <ThemeToggle />
+      <button
+        type="button"
+        class="hamburger md:hidden"
+        aria-label="打开菜单"
+        aria-expanded="false"
+        data-mobile-menu-toggle
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-nav-overlay" data-mobile-menu-overlay>
+  <nav class="mobile-nav-panel" aria-label="移动端导航">
+    {
+      site.nav.map((item) => (
+        <a
+          href={item.href}
+          class:list={[isActive(item.href) && 'active']}
+        >
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+</div>
+
+<script>
+  const toggle = document.querySelector('[data-mobile-menu-toggle]');
+  const overlay = document.querySelector('[data-mobile-menu-overlay]');
+
+  if (toggle && overlay) {
+    const open = () => {
+      toggle.classList.add('open');
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-label', '关闭菜单');
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const close = () => {
+      toggle.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', '打开菜单');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    };
+
+    toggle.addEventListener('click', () => {
+      const isOpen = toggle.classList.contains('open');
+      isOpen ? close() : open();
+    });
+
+    overlay.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', close);
+    });
+  }
+</script>

@@ -1,0 +1,16 @@
+---
+import { getCollection } from 'astro:content';
+import PageHero from '../../components/PageHero.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { sortByDate } from '../../lib/content';
+
+const projects = sortByDate(await getCollection('projects'));
+---
+
+<BaseLayout title="项目" description="项目作品、工程实践和可公开展示的 Demo。">
+  <PageHero eyebrow="Projects" title="项目" description="把课程项目、开源作品、研究工具和产品原型集中展示。每个项目都可以补充技术栈、链接和复盘文章。" />
+  <section class="page-wrap grid gap-5 pb-16 md:grid-cols-2">
+    {projects.map((project, i) => <div class="reveal" style={`animation-delay: ${i * 0.08}s`}><ProjectCard project={project} /></div>)}
+  </section>
+</BaseLayout>
