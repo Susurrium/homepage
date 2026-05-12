@@ -1,0 +1,161 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+
+const imageUrl = 'file:///C:/Users/21689/Desktop/ChatGPT Image 2026年5月12日 15_38_35.png';
+---
+
+<div class:list={['signature', className]}>
+  <img class="signature-image" src={imageUrl} alt="Susurrium signature" />
+  <div class="signature-overlay"></div>
+</div>
+
+<style>
+  .signature {
+    display: inline-block;
+    position: relative;
+    max-width: 400px;
+    width: 100%;
+    height: 110px;
+    overflow: hidden;
+  }
+
+  .signature::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(90deg, transparent 49.5%, rgba(255,255,255,0.4) 49.5%, rgba(255,255,255,0.4) 50.5%, transparent 50.5%),
+      linear-gradient(0deg, transparent 49.5%, rgba(255,255,255,0.4) 49.5%, rgba(255,255,255,0.4) 50.5%, transparent 50.5%);
+    background-size: 10px 10px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .signature-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    clip-path: inset(0 100% 0 0);
+    will-change: clip-path;
+  }
+
+  .signature-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 95%, rgba(255,255,255,0.5) 100%);
+    pointer-events: none;
+    opacity: 0;
+    z-index: 2;
+    will-change: opacity;
+  }
+</style>
+
+<script define:vars={{ imageUrl }}>
+  class SignatureAnimation {
+    private container: HTMLElement;
+    private img: HTMLImageElement;
+    private overlay: HTMLElement;
+    private startTime: number | null = null;
+    private isImageLoaded = false;
+
+    private drawDuration = 2800;
+    private holdDuration = 2200;
+    private fadeOutDuration = 1400;
+    private pauseDuration = 600;
+
+    private get cycleDuration() {
+      return this.drawDuration + this.holdDuration + this.fadeOutDuration + this.pauseDuration;
+    }
+
+    constructor(container: HTMLElement) {
+      this.container = container;
+      this.img = container.querySelector('.signature-image');
+      this.overlay = container.querySelector('.signature-overlay');
+
+      this.loadImage(imageUrl).then(() => {
+        this.isImageLoaded = true;
+        this.animate();
+      });
+    }
+
+    private loadImage(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+
+    private easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+    private easeInQuad(t) { return t * t; }
+
+    private animate = () => {
+      if (!this.isImageLoaded) return;
+
+      if (!this.startTime) this.startTime = performance.now();
+      const elapsed = performance.now() - this.startTime;
+      const cycleTime = elapsed % this.cycleDuration;
+
+      let clipRight = 100;
+      let opacity = 1;
+      let overlayOpacity = 0;
+
+      if (cycleTime < this.drawDuration) {
+        // Drawing phase - reveal from left to right
+        const t = cycleTime / this.drawDuration;
+        clipRight = 100 - this.easeOutQuart(t) * 100;
+        opacity = 1;
+        overlayOpacity = 0;
+      } else if (cycleTime < this.drawDuration + this.holdDuration) {
+        // Hold phase - fully visible
+        clipRight = 0;
+        opacity = 1;
+        // Subtle shimmer with overlay
+        const holdProgress = (cycleTime - this.drawDuration) / this.holdDuration;
+        overlayOpacity = Math.sin(holdProgress * Math.PI * 3) * 0.15;
+      } else if (cycleTime < this.drawDuration + this.holdDuration + this.fadeOutDuration) {
+        // Fade out phase
+        const t = (cycleTime - this.drawDuration - this.holdDuration) / this.fadeOutDuration;
+        clipRight = 0;
+        opacity = 1 - this.easeInQuad(t);
+        overlayOpacity = 0;
+      } else {
+        // Pause phase - invisible
+        clipRight = 100;
+        opacity = 0;
+        overlayOpacity = 0;
+      }
+
+      this.updateVisual(clipRight, opacity, overlayOpacity);
+      requestAnimationFrame(this.animate);
+    };
+
+    private updateVisual(clipRight, opacity, overlayOpacity) {
+      if (opacity <= 0.01) {
+        this.img.style.clipPath = 'inset(0 100% 0 0)';
+        return;
+      }
+
+      this.img.style.clipPath = `inset(0 ${clipRight}% 0 0)`;
+      this.img.style.opacity = opacity;
+      this.overlay.style.opacity = overlayOpacity;
+    }
+  }
+
+  function initSignatures() {
+    document.querySelectorAll('.signature').forEach((el) => {
+      new SignatureAnimation(el);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initSignatures);
+</script>

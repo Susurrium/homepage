@@ -3,6 +3,7 @@ import { ArrowRight, MapPin, Sparkles } from '@lucide/astro';
 import { getCollection } from 'astro:content';
 import PostCard from '../components/PostCard.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import Signature from '../components/Signature.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site } from '../data/site';
 import { published, sortByDate } from '../lib/content';
@@ -28,6 +29,9 @@ const projects = sortByDate(await getCollection('projects')).filter((project) =>
         ))}
       </h1>
       <p class="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">{site.profile.summary}</p>
+      <div class="mt-6">
+        <Signature />
+      </div>
 
       <div class="mt-7 flex flex-wrap gap-3">
         <a href="/blog/" class="focus-ring group inline-flex items-center gap-2 rounded-lg bg-[var(--text)] px-5 py-3 text-sm font-medium text-[var(--bg)] transition hover:opacity-90">
