@@ -28,12 +28,12 @@ const svgPath6 = `M 1343 142 L 1341 141 L 1336 145 L 1331 147 L 1327 150 L 1329 
         <stop offset="100%" stop-color="#ea580c" />
       </linearGradient>
     </defs>
-    <path class="signature-path" d={svgPath} fill="url(#signatureGradient)" />
-    <path class="signature-path path2" d={svgPath2} fill="url(#signatureGradient)" />
-    <path class="signature-path path3" d={svgPath3} fill="url(#signatureGradient)" />
-    <path class="signature-path path4" d={svgPath4} fill="url(#signatureGradient)" />
-    <path class="signature-path path5" d={svgPath5} fill="url(#signatureGradient)" />
-    <path class="signature-path path6" d={svgPath6} fill="url(#signatureGradient)" />
+    <path class="signature-path" d={svgPath} fill="none" stroke="url(#signatureGradient)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+    <path class="signature-path path2" d={svgPath2} fill="none" stroke="url(#signatureGradient)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+    <path class="signature-path path3" d={svgPath3} fill="none" stroke="url(#signatureGradient)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+    <path class="signature-path path4" d={svgPath4} fill="none" stroke="url(#signatureGradient)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+    <path class="signature-path path5" d={svgPath5} fill="none" stroke="url(#signatureGradient)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+    <path class="signature-path path6" d={svgPath6} fill="none" stroke="url(#signatureGradient)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
   </svg>
 </div>
 
@@ -67,26 +67,36 @@ const svgPath6 = `M 1343 142 L 1341 141 L 1336 145 L 1331 147 L 1327 150 L 1329 
   }
 
   .signature-path {
-    fill: url(#signatureGradient);
-    opacity: 0;
-    clip-path: inset(0 100% 0 0);
+    stroke-dasharray: 10000;
+    stroke-dashoffset: 10000;
   }
 </style>
 
 <script>
   class SignatureAnimation {
     private container: HTMLElement;
-    private paths: HTMLElement[];
-    private staggerDelay = 300;
-    private revealDuration = 2500;
-    private holdDuration = 2000;
+    private paths: SVGPathElement[];
+    private pathLengths: number[] = [];
+    private revealDuration = 3000;
+    private holdDuration = 2500;
     private fadeOutDuration = 2000;
-    private pauseDuration = 1500;
+    private pauseDuration = 1000;
+    private staggerDelay = 200;
 
     constructor(container: HTMLElement) {
       this.container = container;
       this.paths = Array.from(container.querySelectorAll('.signature-path'));
+      this.initPathLengths();
       this.startLoop();
+    }
+
+    private initPathLengths() {
+      this.pathLengths = this.paths.map(path => {
+        const length = path.getTotalLength();
+        path.style.strokeDasharray = `${length}`;
+        path.style.strokeDashoffset = `${length}`;
+        return length;
+      });
     }
 
     private async startLoop() {
@@ -95,35 +105,46 @@ const svgPath6 = `M 1343 142 L 1341 141 L 1336 145 L 1331 147 L 1327 150 L 1329 
         await this.wait(this.holdDuration);
         await this.fadeOut();
         await this.wait(this.pauseDuration);
+        this.resetPaths();
+        await this.wait(300);
       }
     }
 
     private reveal(): Promise<void> {
       return new Promise((resolve) => {
         this.paths.forEach((path, i) => {
-          const delay = i * this.staggerDelay;
+          const length = this.pathLengths[i];
+          const startDelay = i * this.staggerDelay;
+
           setTimeout(() => {
-            path.style.transition = `clip-path ${this.revealDuration}ms ease-out, opacity 400ms ease-out`;
-            path.style.clipPath = 'inset(0 0% 0 0)';
-            path.style.opacity = '1';
-          }, delay);
+            path.style.transition = `stroke-dashoffset ${this.revealDuration}ms ease-out`;
+            path.style.strokeDashoffset = '0';
+          }, startDelay);
         });
-        const totalRevealTime = (this.paths.length - 1) * this.staggerDelay + this.revealDuration;
-        setTimeout(resolve, totalRevealTime);
+
+        const totalDuration = (this.paths.length - 1) * this.staggerDelay + this.revealDuration;
+        setTimeout(resolve, totalDuration);
       });
     }
 
     private fadeOut(): Promise<void> {
       return new Promise((resolve) => {
-        const totalStagger = (this.paths.length - 1) * (this.staggerDelay / 2);
         this.paths.forEach((path, i) => {
-          const delay = i * (this.staggerDelay / 2);
+          path.style.transition = `opacity ${this.fadeOutDuration}ms ease-in`;
           setTimeout(() => {
-            path.style.transition = `opacity ${this.fadeOutDuration}ms ease-in`;
             path.style.opacity = '0';
-          }, delay);
+          }, i * 50);
         });
-        setTimeout(resolve, totalStagger + this.fadeOutDuration);
+        setTimeout(resolve, this.fadeOutDuration + this.paths.length * 50);
+      });
+    }
+
+    private resetPaths() {
+      this.paths.forEach((path, i) => {
+        const length = this.pathLengths[i];
+        path.style.transition = 'none';
+        path.style.strokeDashoffset = `${length}`;
+        path.style.opacity = '1';
       });
     }
 
@@ -138,5 +159,9 @@ const svgPath6 = `M 1343 142 L 1341 141 L 1336 145 L 1331 147 L 1327 150 L 1329 
     });
   }
 
-  document.addEventListener('DOMContentLoaded', initSignatures);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSignatures);
+  } else {
+    initSignatures();
+  }
 </script>
