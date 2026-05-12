@@ -22,11 +22,10 @@ const svgPath6 = `M 1343 142 L 1341 141 L 1336 145 L 1331 147 L 1327 150 L 1329 
   <svg class="signature-svg" viewBox="0 0 2048 682" preserveAspectRatio="xMidYMid meet">
     <defs>
       <linearGradient id="signatureGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#0d9488" />
-        <stop offset="25%" stop-color="#0891b2" />
-        <stop offset="50%" stop-color="#7c3aed" />
-        <stop offset="75%" stop-color="#a855f7" />
-        <stop offset="100%" stop-color="#ec4899" />
+        <stop offset="0%" stop-color="#2563eb" />
+        <stop offset="40%" stop-color="#3b82f6" />
+        <stop offset="60%" stop-color="#f59e0b" />
+        <stop offset="100%" stop-color="#ea580c" />
       </linearGradient>
     </defs>
     <path class="signature-path" d={svgPath} fill="url(#signatureGradient)" />
@@ -70,92 +69,72 @@ const svgPath6 = `M 1343 142 L 1341 141 L 1336 145 L 1331 147 L 1327 150 L 1329 
   .signature-path {
     fill: url(#signatureGradient);
     opacity: 0;
-    animation: drawPath 2.8s ease-out forwards;
-  }
-
-  .signature-path.path2 { animation-delay: 0.3s; }
-  .signature-path.path3 { animation-delay: 0.8s; }
-  .signature-path.path4 { animation-delay: 1.0s; }
-  .signature-path.path5 { animation-delay: 1.2s; }
-  .signature-path.path6 { animation-delay: 1.4s; }
-
-  @keyframes drawPath {
-    0% {
-      opacity: 0;
-      transform: translateX(-5px);
-    }
-    10% {
-      opacity: 1;
-      transform: translateX(0);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  .signature.active .signature-path {
-    animation: drawPath 2.8s ease-out forwards,
-               fadeLoop 7s ease-in-out infinite;
-  }
-
-  .signature.active .signature-path.path2 {
-    animation: drawPath 2.8s ease-out 0.3s forwards,
-               fadeLoop 7s ease-in-out 2.8s infinite;
-  }
-
-  .signature.active .signature-path.path3 {
-    animation: drawPath 2.8s ease-out 0.8s forwards,
-               fadeLoop 7s ease-in-out 3.3s infinite;
-  }
-
-  .signature.active .signature-path.path4 {
-    animation: drawPath 2.8s ease-out 1.0s forwards,
-               fadeLoop 7s ease-in-out 3.5s infinite;
-  }
-
-  .signature.active .signature-path.path5 {
-    animation: drawPath 2.8s ease-out 1.2s forwards,
-               fadeLoop 7s ease-in-out 3.7s infinite;
-  }
-
-  .signature.active .signature-path.path6 {
-    animation: drawPath 2.8s ease-out 1.4s forwards,
-               fadeLoop 7s ease-in-out 3.9s infinite;
-  }
-
-  @keyframes fadeLoop {
-    0%, 60% {
-      opacity: 1;
-    }
-    75% {
-      opacity: 0.15;
-    }
-    90%, 100% {
-      opacity: 1;
-    }
+    clip-path: inset(0 100% 0 0);
   }
 </style>
 
 <script>
   class SignatureAnimation {
     private container: HTMLElement;
-    private paths: NodeListOf<SVGPathElement>;
+    private paths: HTMLElement[];
+    private staggerDelay = 300;
+    private revealDuration = 2500;
+    private holdDuration = 2000;
+    private fadeOutDuration = 2000;
+    private pauseDuration = 1500;
 
     constructor(container: HTMLElement) {
       this.container = container;
-      this.paths = container.querySelectorAll('.signature-path');
+      this.paths = Array.from(container.querySelectorAll('.signature-path'));
+      this.startLoop();
+    }
 
-      // Trigger initial animation
-      setTimeout(() => {
-        this.container.classList.add('active');
-      }, 100);
+    private async startLoop() {
+      while (true) {
+        await this.reveal();
+        await this.wait(this.holdDuration);
+        await this.fadeOut();
+        await this.wait(this.pauseDuration);
+      }
+    }
+
+    private reveal(): Promise<void> {
+      return new Promise((resolve) => {
+        this.paths.forEach((path, i) => {
+          const delay = i * this.staggerDelay;
+          setTimeout(() => {
+            path.style.transition = `clip-path ${this.revealDuration}ms ease-out, opacity 400ms ease-out`;
+            path.style.clipPath = 'inset(0 0% 0 0)';
+            path.style.opacity = '1';
+          }, delay);
+        });
+        const totalRevealTime = (this.paths.length - 1) * this.staggerDelay + this.revealDuration;
+        setTimeout(resolve, totalRevealTime);
+      });
+    }
+
+    private fadeOut(): Promise<void> {
+      return new Promise((resolve) => {
+        const totalStagger = (this.paths.length - 1) * (this.staggerDelay / 2);
+        this.paths.forEach((path, i) => {
+          const delay = i * (this.staggerDelay / 2);
+          setTimeout(() => {
+            path.style.transition = `opacity ${this.fadeOutDuration}ms ease-in`;
+            path.style.opacity = '0';
+          }, delay);
+        });
+        setTimeout(resolve, totalStagger + this.fadeOutDuration);
+      });
+    }
+
+    private wait(ms: number): Promise<void> {
+      return new Promise((resolve) => setTimeout(resolve, ms));
     }
   }
 
   function initSignatures() {
     document.querySelectorAll('.signature').forEach((el) => {
-      new SignatureAnimation(el);
+      new SignatureAnimation(el as HTMLElement);
     });
   }
 
