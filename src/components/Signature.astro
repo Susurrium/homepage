@@ -29,11 +29,13 @@ const strokes = [
 <div class:list={['signature', className]}>
   <svg class="signature-svg" viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`} preserveAspectRatio="xMidYMid meet">
     <defs>
+      <!-- 蓝色到橙色渐变：从清晨蓝天到夕阳 -->
       <linearGradient id="signatureGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#2563eb" />
-        <stop offset="40%" stop-color="#3b82f6" />
-        <stop offset="60%" stop-color="#f59e0b" />
-        <stop offset="100%" stop-color="#ea580c" />
+        <stop offset="0%" stop-color="#0ea5e9" />      <!-- 天蓝 -->
+        <stop offset="30%" stop-color="#3b82f6" />     <!-- 蓝色 -->
+        <stop offset="50%" stop-color="#8b5cf6" />     <!-- 紫色过渡 -->
+        <stop offset="70%" stop-color="#f97316" />     <!-- 橙色 -->
+        <stop offset="100%" stop-color="#ea580c" />    <!-- 深橙夕阳 -->
       </linearGradient>
 
       <!-- 13个clipPath，对应13个笔画区域 -->
@@ -126,7 +128,7 @@ const strokes = [
 
   .stroke {
     fill: none;
-    stroke: #1a365d;
+    stroke: url(#signatureGradient);
     stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
