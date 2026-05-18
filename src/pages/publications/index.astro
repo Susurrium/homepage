@@ -1,0 +1,40 @@
+---
+import { ExternalLink } from '@lucide/astro';
+import { getCollection } from 'astro:content';
+import PageHero from '../../components/PageHero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate, sortByDate } from '../../lib/content';
+
+const publications = sortByDate(await getCollection('publications'));
+---
+
+<BaseLayout title="成果" description="论文、报告、竞赛、演讲与其他公开成果。">
+  <PageHero eyebrow="Publications" title="成果" description="适合展示论文、技术报告、竞赛成果、演讲材料和公开写作。没有学术成果时，也可以改成作品集或荣誉页面。" />
+
+  <section class="page-wrap grid gap-4 pb-16">
+    {
+      publications.map((item) => (
+        <article class="surface rounded-lg p-5">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <span class="chip">{item.data.type}</span>
+              <h2 class="mt-3 text-xl font-semibold">{item.data.title}</h2>
+              <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{item.data.description}</p>
+              <p class="mt-3 text-sm text-[var(--muted)]">{item.data.venue} · {formatDate(item.data.date)}</p>
+              <p class="mt-2 text-sm text-[var(--muted)]">{item.data.authors.join(', ')}</p>
+            </div>
+            {item.data.link && (
+              <a href={item.data.link} class="focus-ring inline-flex shrink-0 items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm transition hover:border-[var(--accent)]" target="_blank" rel="noreferrer">
+                <ExternalLink class="h-4 w-4" aria-hidden="true" />
+                查看
+              </a>
+            )}
+          </div>
+          <div class="mt-4 flex flex-wrap gap-2">
+            {item.data.tags.map((tag) => <span class="chip">#{tag}</span>)}
+          </div>
+        </article>
+      ))
+    }
+  </section>
+</BaseLayout>

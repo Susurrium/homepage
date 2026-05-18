@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title">
+  <title id="title">Data project cover</title>
+  <rect width="960" height="540" rx="24" fill="#eef3f6" />
+  <rect x="72" y="72" width="816" height="396" rx="22" fill="#fff" stroke="#d9e1e7" />
+  <rect x="126" y="128" width="180" height="24" rx="12" fill="#1d1d20" />
+  <rect x="126" y="392" width="672" height="2" fill="#d9e1e7" />
+  <rect x="180" y="292" width="58" height="100" rx="10" fill="#0f766e" />
+  <rect x="286" y="232" width="58" height="160" rx="10" fill="#4338ca" />
+  <rect x="392" y="184" width="58" height="208" rx="10" fill="#be123c" />
+  <rect x="498" y="254" width="58" height="138" rx="10" fill="#0f766e" fill-opacity="0.72" />
+  <path d="M604 328c54-118 112-116 172-190" fill="none" stroke="#4338ca" stroke-width="16" stroke-linecap="round" />
+  <circle cx="776" cy="138" r="18" fill="#be123c" />
+</svg>

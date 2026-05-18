@@ -1,0 +1,23 @@
+---
+import { getCollection } from 'astro:content';
+import PostCard from '../../components/PostCard.astro';
+import PageHero from '../../components/PageHero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { allTags, published, sortByDate } from '../../lib/content';
+
+const posts = sortByDate(published(await getCollection('blog')));
+const tags = allTags(posts);
+---
+
+<BaseLayout title="博客" description="技术笔记、项目复盘、阅读记录与长期写作。">
+  <PageHero eyebrow="Blog" title="博客" description="这里用于沉淀学习笔记、工程实践、项目复盘和阅读记录。文章全部使用 Markdown 管理，适合长期维护。" />
+
+  <section class="page-wrap pb-16">
+    <div class="mb-6 flex flex-wrap gap-2">
+      {tags.map((tag) => <a href={`/tags/${encodeURIComponent(tag.name)}/`} class="chip hover:border-[var(--accent)]">#{tag.name} {tag.count}</a>)}
+    </div>
+    <div class="grid gap-4">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+  </section>
+</BaseLayout>

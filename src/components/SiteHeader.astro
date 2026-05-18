@@ -1,0 +1,45 @@
+---
+import { Search } from '@lucide/astro';
+import { site } from '../data/site';
+import ThemeToggle from './ThemeToggle.astro';
+
+const currentPath = Astro.url.pathname;
+const isActive = (href: string) => (href === '/' ? currentPath === '/' : currentPath.startsWith(href));
+---
+
+<header class="sticky top-0 z-40 border-b border-[var(--line)] bg-[color-mix(in_srgb,var(--bg)_82%,transparent)] backdrop-blur-xl">
+  <div class="page-wrap flex min-h-16 items-center gap-4 py-3">
+    <a href="/" class="focus-ring flex shrink-0 items-center gap-3 rounded-md" aria-label="返回首页">
+      <img src={site.avatar} alt="" class="h-10 w-10 rounded-md border border-[var(--line)] bg-[var(--surface)]" />
+      <span class="hidden font-semibold sm:inline">{site.shortTitle}</span>
+    </a>
+
+    <nav class="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto px-1" aria-label="主导航">
+      {
+        site.nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'focus-ring shrink-0 rounded-md px-3 py-2 text-sm transition',
+              isActive(item.href)
+                ? 'bg-[var(--surface-soft)] text-[var(--text)]'
+                : 'text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
+            ]}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <a
+      href="/search/"
+      class="focus-ring inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[var(--line)] bg-[var(--surface)] transition hover:border-[var(--accent)]"
+      aria-label="搜索"
+      title="搜索"
+    >
+      <Search class="h-4 w-4" aria-hidden="true" />
+    </a>
+    <ThemeToggle />
+  </div>
+</header>

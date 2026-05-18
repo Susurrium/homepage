@@ -1,17 +1,117 @@
 ---
+import { ArrowRight, MapPin, Sparkles } from '@lucide/astro';
+import { getCollection } from 'astro:content';
+import PostCard from '../components/PostCard.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+import { published, sortByDate } from '../lib/content';
 
+const posts = sortByDate(published(await getCollection('blog'))).slice(0, 3);
+const projects = sortByDate(await getCollection('projects')).filter((project) => project.data.featured).slice(0, 2);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title={site.title} description={site.description}>
+  <section class="page-wrap grid gap-10 pb-12 pt-12 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:pb-20 lg:pt-16">
+    <div>
+      <p class="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-sm text-[var(--muted)]">
+        <Sparkles class="h-4 w-4 text-[var(--accent)]" aria-hidden="true" />
+        {site.profile.availability}
+      </p>
+      <h1 class="mt-6 max-w-3xl text-5xl font-semibold leading-tight tracking-normal sm:text-6xl">
+        {site.profile.headline}
+      </h1>
+      <p class="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">{site.profile.summary}</p>
+
+      <div class="mt-7 flex flex-wrap gap-3">
+        <a href="/blog/" class="focus-ring inline-flex items-center gap-2 rounded-md bg-[var(--text)] px-4 py-3 text-sm font-medium text-[var(--bg)] transition hover:opacity-90">
+          阅读博客
+          <ArrowRight class="h-4 w-4" aria-hidden="true" />
+        </a>
+        <a href="/about/" class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm font-medium transition hover:border-[var(--accent)]">
+          了解更多
+        </a>
+      </div>
+
+      <iframe
+        src="/signature/index.html"
+        title={`${site.author} 的动态签名`}
+        class="mt-9 aspect-[2172/724] w-full max-w-[720px] border-0"
+        loading="eager"
+      ></iframe>
+
+      <div class="mt-8 flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
+        <span class="inline-flex items-center gap-2">
+          <MapPin class="h-4 w-4" aria-hidden="true" />
+          {site.location}
+        </span>
+        {site.profile.keywords.map((keyword) => <span class="chip">{keyword}</span>)}
+      </div>
+    </div>
+
+    <div>
+      <div class="surface rounded-lg p-5">
+        <img src="/images/profile.svg" alt="个人主页视觉卡片" class="w-full rounded-md" />
+        <div class="mt-5 grid grid-cols-3 gap-3">
+          {
+            site.stats.map((stat) => (
+              <div class="rounded-md border border-[var(--line)] bg-[var(--surface-soft)] p-3">
+                <p class="text-2xl font-semibold">{stat.value}</p>
+                <p class="mt-1 text-xs text-[var(--muted)]">{stat.label}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="border-y border-[var(--line)] bg-[color-mix(in_srgb,var(--surface)_52%,transparent)]">
+    <div class="page-wrap grid gap-8 py-12 lg:grid-cols-3">
+      {
+        site.skills.map((group) => (
+          <div>
+            <h2 class="text-lg font-semibold">{group.group}</h2>
+            <div class="mt-4 flex flex-wrap gap-2">
+              {group.items.map((item) => <span class="chip">{item}</span>)}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section page-wrap">
+    <div class="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="text-sm font-medium text-[var(--accent)]">Blog</p>
+        <h2 class="mt-2 text-3xl font-semibold">最新文章</h2>
+      </div>
+      <a href="/blog/" class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--text)]">
+        全部文章
+        <ArrowRight class="h-4 w-4" aria-hidden="true" />
+      </a>
+    </div>
+    <div class="grid gap-4">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+  </section>
+
+  <section class="section border-t border-[var(--line)]">
+    <div class="page-wrap">
+      <div class="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p class="text-sm font-medium text-[var(--accent)]">Projects</p>
+          <h2 class="mt-2 text-3xl font-semibold">代表项目</h2>
+        </div>
+        <a href="/projects/" class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--text)]">
+          查看项目
+          <ArrowRight class="h-4 w-4" aria-hidden="true" />
+        </a>
+      </div>
+      <div class="grid gap-5 md:grid-cols-2">
+        {projects.map((project) => <ProjectCard project={project} />)}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

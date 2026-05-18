@@ -1,0 +1,15 @@
+---
+import { getCollection } from 'astro:content';
+import PageHero from '../../components/PageHero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { allTags, published } from '../../lib/content';
+
+const tags = allTags(published(await getCollection('blog')));
+---
+
+<BaseLayout title="标签" description="博客文章标签索引。">
+  <PageHero eyebrow="Tags" title="标签" description="按主题浏览文章。" />
+  <section class="page-wrap flex flex-wrap gap-3 pb-16">
+    {tags.map((tag) => <a href={`/tags/${encodeURIComponent(tag.name)}/`} class="chip hover:border-[var(--accent)]">#{tag.name} {tag.count}</a>)}
+  </section>
+</BaseLayout>

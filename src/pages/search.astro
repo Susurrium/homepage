@@ -1,0 +1,45 @@
+---
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="搜索" description="搜索本站文章、项目和页面。">
+  <PageHero eyebrow="Search" title="搜索" description="构建后由 Pagefind 提供全文搜索。开发模式下如果没有索引，请先运行 npm run build 再预览。" />
+
+  <section class="page-wrap pb-16">
+    <div class="surface rounded-lg p-5">
+      <div id="search"></div>
+      <noscript>
+        <p class="text-sm text-[var(--muted)]">搜索需要启用 JavaScript。</p>
+      </noscript>
+    </div>
+  </section>
+
+  <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+  <script is:inline src="/pagefind/pagefind-ui.js"></script>
+  <script is:inline>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!window.PagefindUI) {
+        const root = document.getElementById('search');
+        if (root) root.innerHTML = '<p class="text-sm text-[var(--muted)]">当前还没有搜索索引。请运行 npm run build 后使用 npm run preview 查看搜索效果。</p>';
+        return;
+      }
+
+      new window.PagefindUI({
+        element: '#search',
+        showImages: false,
+        translations: {
+          placeholder: '搜索文章、项目、标签...',
+          clear_search: '清除',
+          load_more: '加载更多',
+          search_label: '搜索本站',
+          filters_label: '筛选',
+          zero_results: '没有找到结果',
+          many_results: '[COUNT] 个结果',
+          one_result: '[COUNT] 个结果',
+          searching: '搜索中...'
+        }
+      });
+    });
+  </script>
+</BaseLayout>
