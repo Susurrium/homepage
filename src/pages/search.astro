@@ -1,6 +1,9 @@
 ---
 import PageHero from '../components/PageHero.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/url';
+
+const pagefindPath = withBase('/pagefind/');
 ---
 
 <BaseLayout title="搜索" description="搜索本站文章、项目和页面。">
@@ -15,9 +18,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </div>
   </section>
 
-  <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
-  <script is:inline src="/pagefind/pagefind-ui.js"></script>
-  <script is:inline>
+  <link href={`${pagefindPath}pagefind-ui.css`} rel="stylesheet" />
+  <script is:inline src={`${pagefindPath}pagefind-ui.js`}></script>
+  <script is:inline define:vars={{ pagefindPath }}>
     window.addEventListener('DOMContentLoaded', () => {
       if (!window.PagefindUI) {
         const root = document.getElementById('search');
@@ -27,6 +30,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       new window.PagefindUI({
         element: '#search',
+        bundlePath: pagefindPath,
         showImages: false,
         translations: {
           placeholder: '搜索文章、项目、标签...',

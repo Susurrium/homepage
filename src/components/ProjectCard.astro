@@ -1,6 +1,7 @@
 ---
 import { ArrowUpRight, ExternalLink, GitBranch } from '@lucide/astro';
 import type { CollectionEntry } from 'astro:content';
+import { withBase } from '../lib/url';
 
 interface Props {
   project: CollectionEntry<'projects'>;
@@ -12,8 +13,8 @@ const { project } = Astro.props;
 <article class="surface overflow-hidden rounded-lg transition hover:-translate-y-0.5 hover:border-[var(--accent)]">
   {
     project.data.cover && (
-      <a href={`/projects/${project.id}/`} class="focus-ring block">
-        <img src={project.data.cover} alt="" class="aspect-[16/9] w-full object-cover" loading="lazy" />
+      <a href={withBase(`/projects/${project.id}/`)} class="focus-ring block">
+        <img src={withBase(project.data.cover)} alt="" class="aspect-[16/9] w-full object-cover" loading="lazy" />
       </a>
     )
   }
@@ -23,7 +24,7 @@ const { project } = Astro.props;
         <span class="chip">{project.data.status}</span>
         <h2 class="mt-3 text-xl font-semibold">{project.data.title}</h2>
       </div>
-      <a href={`/projects/${project.id}/`} class="focus-ring rounded-md p-1 text-[var(--muted)] transition hover:text-[var(--accent)]" aria-label="查看项目详情">
+      <a href={withBase(`/projects/${project.id}/`)} class="focus-ring rounded-md p-1 text-[var(--muted)] transition hover:text-[var(--accent)]" aria-label="查看项目详情">
         <ArrowUpRight class="h-5 w-5" aria-hidden="true" />
       </a>
     </div>

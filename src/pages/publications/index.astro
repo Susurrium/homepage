@@ -9,10 +9,10 @@ const publications = sortByDate(await getCollection('publications'));
 ---
 
 <BaseLayout title="成果" description="论文、报告、竞赛、演讲与其他公开成果。">
-  <PageHero eyebrow="Publications" title="成果" description="适合展示论文、技术报告、竞赛成果、演讲材料和公开写作。没有学术成果时，也可以改成作品集或荣誉页面。" />
+  <PageHero eyebrow="Publications" title="成果" description="公开报告、项目总结、演讲与其他可复用产出。" />
 
   <section class="page-wrap grid gap-4 pb-16">
-    {
+    {publications.length > 0 ? (
       publications.map((item) => (
         <article class="surface rounded-lg p-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -35,6 +35,8 @@ const publications = sortByDate(await getCollection('publications'));
           </div>
         </article>
       ))
-    }
+    ) : (
+      <p class="surface rounded-lg p-5 text-sm text-[var(--muted)]">暂无公开成果。</p>
+    )}
   </section>
 </BaseLayout>

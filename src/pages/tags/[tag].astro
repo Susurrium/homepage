@@ -8,7 +8,7 @@ import { allTags, published, sortByDate } from '../../lib/content';
 export async function getStaticPaths() {
   const posts = published(await getCollection('blog'));
   return allTags(posts).map((tag) => ({
-    params: { tag: encodeURIComponent(tag.name) },
+    params: { tag: tag.name },
     props: { tag: tag.name, posts: posts.filter((post) => post.data.tags.includes(tag.name)) }
   }));
 }

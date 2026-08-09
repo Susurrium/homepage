@@ -2,6 +2,7 @@
 import SiteFooter from '../components/SiteFooter.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import { site } from '../data/site';
+import { withBase } from '../lib/url';
 import '../styles/global.css';
 
 interface Props {
@@ -9,18 +10,20 @@ interface Props {
   description?: string;
   image?: string;
   type?: 'website' | 'article';
+  noindex?: boolean;
 }
 
 const {
   title = site.title,
   description = site.description,
-  image = '/images/og.svg',
-  type = 'website'
+  image = '/images/og.png',
+  type = 'website',
+  noindex = false
 } = Astro.props;
 
 const pageTitle = title === site.title ? title : `${title} | ${site.shortTitle}`;
 const canonical = Astro.url.href;
-const imageUrl = new URL(image, Astro.url).toString();
+const imageUrl = new URL(withBase(image), Astro.url).toString();
 ---
 
 <!doctype html>
@@ -39,10 +42,11 @@ const imageUrl = new URL(image, Astro.url).toString();
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
-    <link rel="alternate" type="application/rss+xml" title={`${site.shortTitle} RSS`} href="/rss.xml" />
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+    <link rel="icon" href={withBase('/favicon.ico')} />
+    <link rel="alternate" type="application/rss+xml" title={`${site.shortTitle} RSS`} href={withBase('/rss.xml')} />
     <meta property="og:type" content={type} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />

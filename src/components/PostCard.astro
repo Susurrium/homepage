@@ -2,6 +2,7 @@
 import { ArrowUpRight, CalendarDays } from '@lucide/astro';
 import type { CollectionEntry } from 'astro:content';
 import { formatDate, readingTime } from '../lib/content';
+import { withBase } from '../lib/url';
 
 interface Props {
   post: CollectionEntry<'blog'>;
@@ -11,7 +12,7 @@ const { post } = Astro.props;
 ---
 
 <article class="surface group rounded-lg p-5 transition hover:-translate-y-0.5 hover:border-[var(--accent)]">
-  <a href={`/blog/${post.id}/`} class="focus-ring block rounded-md">
+  <a href={withBase(`/blog/${post.id}/`)} class="focus-ring block rounded-md">
     <div class="flex items-start justify-between gap-4">
       <div class="min-w-0">
         <p class="flex items-center gap-2 text-sm text-[var(--muted)]">

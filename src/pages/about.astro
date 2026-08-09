@@ -3,26 +3,33 @@ import { Mail, MapPin } from '@lucide/astro';
 import PageHero from '../components/PageHero.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site } from '../data/site';
+import { withBase } from '../lib/url';
 ---
 
 <BaseLayout title="关于" description="个人介绍、教育经历、技能栈与联系方式。">
-  <PageHero eyebrow="About" title="关于我" description="这里是一份比首页更完整的个人介绍，可以改成中文简历、学术主页或作品集介绍。" />
+  <PageHero eyebrow="About" title="关于我" description="正在做的项目、持续积累的能力，以及这个站点背后的工作方式。" />
 
   <section class="page-wrap grid gap-8 pb-16 lg:grid-cols-[0.8fr_1.2fr]">
     <aside class="surface h-fit rounded-lg p-5">
-      <img src={site.avatar} alt="个人头像" class="w-full rounded-md border border-[var(--line)] bg-[var(--surface-soft)]" />
+      <img src={withBase(site.avatar)} alt="Susurrium 的个人主页头像" class="w-full rounded-md border border-[var(--line)] bg-[var(--surface-soft)]" />
       <h2 class="mt-5 text-2xl font-semibold">{site.shortTitle}</h2>
       <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{site.profile.summary}</p>
-      <div class="mt-5 grid gap-3 text-sm text-[var(--muted)]">
-        <p class="flex items-center gap-2">
-          <MapPin class="h-4 w-4" aria-hidden="true" />
-          {site.location}
-        </p>
-        <a href={`mailto:${site.email}`} class="focus-ring flex items-center gap-2 rounded-md transition hover:text-[var(--accent)]">
-          <Mail class="h-4 w-4" aria-hidden="true" />
-          {site.email}
-        </a>
-      </div>
+      {(site.location || site.email) && (
+        <div class="mt-5 grid gap-3 text-sm text-[var(--muted)]">
+          {site.location && (
+            <p class="flex items-center gap-2">
+              <MapPin class="h-4 w-4" aria-hidden="true" />
+              {site.location}
+            </p>
+          )}
+          {site.email && (
+            <a href={`mailto:${site.email}`} class="focus-ring flex items-center gap-2 rounded-md transition hover:text-[var(--accent)]">
+              <Mail class="h-4 w-4" aria-hidden="true" />
+              {site.email}
+            </a>
+          )}
+        </div>
+      )}
     </aside>
 
     <div class="grid gap-8">
@@ -41,21 +48,21 @@ import { site } from '../data/site';
         </div>
       </section>
 
-      <section>
-        <h2 class="text-2xl font-semibold">教育</h2>
-        <div class="mt-4 grid gap-4">
-          {
-            site.education.map((item) => (
+      {site.education.length > 0 && (
+        <section>
+          <h2 class="text-2xl font-semibold">教育</h2>
+          <div class="mt-4 grid gap-4">
+            {site.education.map((item) => (
               <article class="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5">
                 <p class="text-sm text-[var(--muted)]">{item.period}</p>
                 <h3 class="mt-2 text-lg font-semibold">{item.school}</h3>
                 <p class="mt-1 text-sm text-[var(--muted)]">{item.degree}</p>
                 <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{item.detail}</p>
               </article>
-            ))
-          }
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section>
         <h2 class="text-2xl font-semibold">技能</h2>

@@ -1,11 +1,11 @@
 export const site = {
-  title: '你的名字 | 个人主页',
-  shortTitle: '你的名字',
-  description: '一个用于展示个人介绍、技术博客、项目作品与学术经历的现代个人主页。',
-  url: 'https://example.com',
-  author: '你的名字',
-  location: '北京 / 远程',
-  email: 'hello@example.com',
+  title: 'Susurrium | 个人主页',
+  shortTitle: 'Susurrium',
+  description: 'Susurrium 的个人主页，记录软件工程、数据分析、项目实践与长期写作。',
+  url: 'https://susurrium.github.io/homepage/',
+  author: 'Susurrium',
+  location: null as string | null,
+  email: null as string | null,
   avatar: '/images/profile.svg',
   nav: [
     { href: '/', label: '首页' },
@@ -16,48 +16,40 @@ export const site = {
     { href: '/links/', label: '友链' }
   ],
   social: [
-    { label: 'GitHub', href: 'https://github.com/yourname', icon: 'github' },
-    { label: 'Email', href: 'mailto:hello@example.com', icon: 'mail' },
+    { label: 'GitHub', href: 'https://github.com/Susurrium', icon: 'github' },
     { label: 'RSS', href: '/rss.xml', icon: 'rss' }
   ],
   profile: {
-    headline: '关注软件工程、数据分析与长期写作',
+    headline: '构建、分析，也长期写作',
     summary:
-      '这里可以写你的专业方向、正在做的项目和长期兴趣。本站按个人主页、博客、项目、成果四个核心模块组织，适合技术、科研、设计或产品方向持续维护。',
+      '围绕软件工程、数据分析与知识管理持续实践，在这里整理项目、技术笔记和阶段性成果。',
     keywords: ['Astro', 'TypeScript', '数据分析', '产品思维', '写作'],
-    availability: '开放交流 / 项目合作 / 实习机会'
+    availability: '持续构建 · 公开记录 · 欢迎交流'
   },
-  stats: [
-    { label: '文章', value: '12+' },
-    { label: '项目', value: '6' },
-    { label: '领域', value: '4' }
-  ],
-  education: [
-    {
-      school: '某某大学',
-      degree: '本科 / 硕士',
-      period: '2023 - 2027',
-      detail: '专业方向：计算机、医学工程、数据科学或你自己的方向。'
-    }
-  ],
+  education: [] as Array<{
+    school: string;
+    degree: string;
+    period: string;
+    detail: string;
+  }>,
   experience: [
     {
-      title: '个人知识库与博客建设',
-      org: '长期项目',
-      period: '2025 - 至今',
-      detail: '围绕学习笔记、工程实践和项目复盘建立稳定输出系统。'
+      title: '个人主页与博客系统',
+      org: '开源项目',
+      period: '持续维护',
+      detail: '使用 Astro、Markdown 内容集合与 Pagefind 构建可持续维护的静态个人站。'
     },
     {
       title: '数据分析与可视化实践',
-      org: '课程 / 竞赛 / 研究',
-      period: '2024 - 2026',
-      detail: '使用 Python、SQL 和前端可视化工具完成数据处理、建模与展示。'
+      org: '个人项目',
+      period: '持续整理',
+      detail: '沉淀数据处理、指标设计、图表表达与项目复盘方法。'
     }
   ],
   skills: [
     {
       group: '工程',
-      items: ['TypeScript', 'Astro', 'React', 'Node.js', 'Git']
+      items: ['TypeScript', 'Astro', 'Node.js', 'Git']
     },
     {
       group: '数据',

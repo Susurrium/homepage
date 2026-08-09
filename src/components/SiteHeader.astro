@@ -1,16 +1,20 @@
 ---
 import { Search } from '@lucide/astro';
 import { site } from '../data/site';
+import { withBase } from '../lib/url';
 import ThemeToggle from './ThemeToggle.astro';
 
 const currentPath = Astro.url.pathname;
-const isActive = (href: string) => (href === '/' ? currentPath === '/' : currentPath.startsWith(href));
+const isActive = (href: string) => {
+  const resolvedHref = withBase(href);
+  return href === '/' ? currentPath === resolvedHref : currentPath.startsWith(resolvedHref);
+};
 ---
 
 <header class="sticky top-0 z-40 border-b border-[var(--line)] bg-[color-mix(in_srgb,var(--bg)_82%,transparent)] backdrop-blur-xl">
   <div class="page-wrap flex min-h-16 items-center gap-4 py-3">
-    <a href="/" class="focus-ring flex shrink-0 items-center gap-3 rounded-md" aria-label="返回首页">
-      <img src={site.avatar} alt="" class="h-10 w-10 rounded-md border border-[var(--line)] bg-[var(--surface)]" />
+    <a href={withBase('/')} class="focus-ring flex shrink-0 items-center gap-3 rounded-md" aria-label="返回首页">
+      <img src={withBase(site.avatar)} alt="" class="h-10 w-10 rounded-md border border-[var(--line)] bg-[var(--surface)]" />
       <span class="hidden font-semibold sm:inline">{site.shortTitle}</span>
     </a>
 
@@ -18,7 +22,8 @@ const isActive = (href: string) => (href === '/' ? currentPath === '/' : current
       {
         site.nav.map((item) => (
           <a
-            href={item.href}
+            href={withBase(item.href)}
+            aria-current={isActive(item.href) ? 'page' : undefined}
             class:list={[
               'focus-ring shrink-0 rounded-md px-3 py-2 text-sm transition',
               isActive(item.href)
@@ -33,7 +38,7 @@ const isActive = (href: string) => (href === '/' ? currentPath === '/' : current
     </nav>
 
     <a
-      href="/search/"
+      href={withBase('/search/')}
       class="focus-ring inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[var(--line)] bg-[var(--surface)] transition hover:border-[var(--accent)]"
       aria-label="搜索"
       title="搜索"

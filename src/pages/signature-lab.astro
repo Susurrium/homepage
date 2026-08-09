@@ -1,0 +1,252 @@
+---
+import DynamicSignature from '../components/DynamicSignature.astro';
+import SignatureGradientCandidate from '../components/signature/SignatureGradientCandidate.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+import { withBase } from '../lib/url';
+
+const rasterCandidates = [
+  {
+    title: 'P1 原始透明 PNG',
+    source: 'signature-generator/signature-original-transparent.png',
+    href: '/signature-candidates/source-alpha.png',
+    note: '更接近原始图像质感，优先作为新的视觉基准。',
+  },
+  {
+    title: 'P2 当前首页 PNG 静态图',
+    source: 'homepage/public/images/signature-ink.png',
+    href: '/images/signature-ink.png',
+    note: '当前首页动画使用的底图，先把动画影响排除，只看图本身。',
+  },
+  {
+    title: 'P3 原始源图 PNG',
+    source: 'signature-generator/signature-original.png',
+    href: '/signature-candidates/original-source.png',
+    note: '原始导入图，可能带背景，用来追溯形状来源。',
+  },
+];
+
+const svgCandidates = [
+  {
+    title: 'S1 静态矢量初版',
+    source: 'homepage总/signature_vector.svg',
+    href: '/signature-candidates/static-vector.svg',
+    note: '早期矢量轮廓，文件小，但形状容易显得硬。',
+  },
+  {
+    title: 'S2 solid-vector',
+    source: 'homepage总/动态签名/signature_solid.svg',
+    href: '/signature-candidates/solid-vector.svg',
+    note: '纯色 SVG 版，用来判断字形轮廓。',
+  },
+  {
+    title: 'S3 stroke-order-original',
+    source: 'homepage总/动态签名/signature_stroke_order_animated.svg',
+    href: '/signature-candidates/stroke-order-original.svg',
+    note: '早期笔顺动画 SVG。',
+  },
+  {
+    title: 'S4 stroke-order-124536',
+    source: 'homepage总/动态签名/signature_stroke_order_124536_animated.svg',
+    href: '/signature-candidates/stroke-order-124536.svg',
+    note: '调整过笔顺顺序的动画 SVG。',
+  },
+  {
+    title: 'S5 13-stroke-refined',
+    source: 'homepage总/动态签名/susurrium_signature_stroke_order_refined.svg',
+    href: '/signature-candidates/13-stroke-refined.svg',
+    note: '后期高保真分笔画 SVG，动画思路可参考，视觉上偏硬偏粗。',
+  },
+  {
+    title: 'S6 13-stroke-reordered',
+    source: 'homepage总/动态签名/susurrium_signature_stroke_order_reordered.svg',
+    href: '/signature-candidates/reordered-13-stroke.svg',
+    note: '和 cc/homepage/public/signature.svg 哈希一致；不再作为默认最好候选。',
+  },
+];
+---
+
+<BaseLayout title="Signature Lab" description="签名版本候选对比页" noindex>
+  <section class="page-wrap py-12" data-pagefind-ignore>
+    <div class="max-w-3xl">
+      <p class="text-sm font-medium text-[var(--accent)]">Signature Lab</p>
+      <h1 class="mt-3 text-4xl font-semibold leading-tight tracking-normal">签名版本对比</h1>
+      <p class="mt-4 leading-8 text-[var(--muted)]">
+        这个页面只用于整理和目测，不替换首页。13 笔画渐变版已经降级：它可作为技术参考，但当前视觉效果不适合直接上首页。
+      </p>
+    </div>
+
+    <div class="mt-10 candidate-card">
+      <div class="candidate-meta">
+        <p class="candidate-tag">A 当前首页实际保存版</p>
+        <h2>整图揭示 PNG 动画</h2>
+        <p>/images/signature-ink.png + src/components/DynamicSignature.astro。这个是当前首页主线，动画已改为整图揭示。</p>
+      </div>
+      <div class="specimen specimen-large">
+        <DynamicSignature label={`${site.author} 的当前动态手写签名`} />
+      </div>
+    </div>
+
+    <div class="mt-10 grid gap-5 md:grid-cols-2">
+      {
+        rasterCandidates.map((candidate) => (
+          <article class="candidate-card">
+            <div class="candidate-meta">
+              <p class="candidate-tag">{candidate.source}</p>
+              <h2>{candidate.title}</h2>
+              <p>{candidate.note}</p>
+            </div>
+            <div class="specimen specimen-compact">
+              <img src={withBase(candidate.href)} alt={candidate.title} loading="lazy" />
+            </div>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="mt-10 candidate-card candidate-card-warn">
+      <div class="candidate-meta">
+        <p class="candidate-tag">X 降级候选，不建议直接使用</p>
+        <h2>13 笔画渐变 SVG 动画</h2>
+        <p>来自 cc/homepage 的后期 Signature.astro。问题是颜色太跳、笔画太厚，手写感不足。</p>
+      </div>
+      <div class="specimen specimen-large">
+        <SignatureGradientCandidate label={`${site.author} 的 13 笔画渐变签名降级候选`} />
+      </div>
+    </div>
+
+    <div class="mt-10 candidate-card">
+      <div class="candidate-meta">
+        <p class="candidate-tag">生成器导出版</p>
+        <h2>dynamic-signature.html</h2>
+        <p>来自 homepage总/dynamic-signature.html，保留当时导出的完整交互效果。只作为历史留档，不作为当前主线。</p>
+      </div>
+      <div class="specimen specimen-html">
+        <iframe
+          src={withBase('/signature-candidates/generator-export.html')}
+          title="dynamic-signature.html 历史动画预览"
+          sandbox="allow-scripts"
+          referrerpolicy="no-referrer"
+          loading="lazy"
+        ></iframe>
+      </div>
+    </div>
+
+    <div class="mt-10">
+      <h2 class="text-2xl font-semibold tracking-normal">SVG 源文件完整预览</h2>
+      <p class="mt-3 max-w-3xl leading-8 text-[var(--muted)]">
+        下面改用图片方式缩放 SVG，避免 iframe 只显示局部导致误判。
+      </p>
+    </div>
+
+    <div class="mt-6 grid gap-5 md:grid-cols-2">
+      {
+        svgCandidates.map((candidate) => (
+          <article class="candidate-card">
+            <div class="candidate-meta">
+              <p class="candidate-tag">{candidate.source}</p>
+              <h2>{candidate.title}</h2>
+              <p>{candidate.note}</p>
+            </div>
+            <div class="specimen specimen-compact">
+              <img src={withBase(candidate.href)} alt={candidate.title} loading="lazy" />
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .candidate-card {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+  }
+
+  .candidate-card-warn {
+    border-color: color-mix(in srgb, var(--accent-2) 48%, var(--line));
+  }
+
+  .candidate-meta {
+    border-bottom: 1px solid var(--line);
+    padding: 1rem;
+  }
+
+  .candidate-tag {
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .candidate-card-warn .candidate-tag {
+    color: var(--accent-2);
+  }
+
+  .candidate-meta h2 {
+    margin-top: 0.35rem;
+    font-size: 1.12rem;
+    font-weight: 720;
+    letter-spacing: 0;
+  }
+
+  .candidate-meta p:not(.candidate-tag) {
+    margin-top: 0.45rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+
+  .specimen {
+    display: grid;
+    min-height: 260px;
+    place-items: center;
+    overflow: hidden;
+    padding: clamp(1rem, 3vw, 2rem);
+    background:
+      linear-gradient(45deg, #f3f4f6 25%, transparent 25%),
+      linear-gradient(-45deg, #f3f4f6 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #f3f4f6 75%),
+      linear-gradient(-45deg, transparent 75%, #f3f4f6 75%),
+      #ffffff;
+    background-position:
+      0 0,
+      0 10px,
+      10px -10px,
+      -10px 0;
+    background-size: 20px 20px;
+  }
+
+  .specimen-large {
+    min-height: 340px;
+  }
+
+  .specimen-compact {
+    min-height: 240px;
+  }
+
+  .specimen-html {
+    min-height: 520px;
+  }
+
+  .specimen :global(.dynamic-signature) {
+    width: min(760px, 100%);
+  }
+
+  .specimen img {
+    width: min(760px, 100%);
+    max-height: 280px;
+    object-fit: contain;
+  }
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    border: 0;
+    background: transparent;
+  }
+</style>

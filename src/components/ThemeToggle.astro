@@ -6,7 +6,8 @@ import { Moon, Sun } from '@lucide/astro';
   type="button"
   data-theme-toggle
   class="focus-ring inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[var(--line)] bg-[var(--surface)] text-[var(--text)] transition hover:border-[var(--accent)]"
-  aria-label="切换深色模式"
+  aria-label="深色模式"
+  aria-pressed="false"
   title="切换深色模式"
 >
   <Sun class="h-4 w-4 dark:hidden" aria-hidden="true" />
@@ -14,9 +15,18 @@ import { Moon, Sun } from '@lucide/astro';
 </button>
 
 <script>
+  const syncThemeToggle = () => {
+    const isDark = document.documentElement.classList.contains('dark');
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(isDark));
+      button.title = isDark ? '切换为浅色模式' : '切换为深色模式';
+    });
+  };
+
   const applyTheme = (theme: string) => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('theme', theme);
+    syncThemeToggle();
   };
 
   document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
@@ -25,4 +35,6 @@ import { Moon, Sun } from '@lucide/astro';
       applyTheme(next);
     });
   });
+
+  syncThemeToggle();
 </script>

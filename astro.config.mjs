@@ -4,10 +4,14 @@ import sitemap from '@astrojs/sitemap';
 
 import tailwindcss from '@tailwindcss/vite';
 
+const site = process.env.SITE_URL ?? 'https://susurrium.github.io';
+const base = process.env.BASE_PATH ?? '/homepage';
+
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://example.com',
-  integrations: [sitemap()],
+  site,
+  base,
+  integrations: [sitemap({ filter: (page) => !page.endsWith('/signature-lab/') })],
   vite: {
     plugins: [tailwindcss()]
   }

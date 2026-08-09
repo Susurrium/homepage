@@ -1,0 +1,366 @@
+---
+import { withBase } from '../../lib/url';
+
+interface Props {
+  class?: string;
+  assetPath?: string;
+  label?: string;
+  loop?: boolean;
+  showGuide?: boolean;
+}
+
+const {
+  class: className = '',
+  assetPath = '/signature-candidates/reordered-13-stroke.svg',
+  label = '13 笔画渐变签名候选版',
+  loop = true,
+  showGuide = false,
+} = Astro.props;
+
+const SVG_WIDTH = 2048;
+const SVG_HEIGHT = 682;
+const signatureId = `signature-gradient-${Math.random().toString(36).slice(2, 9)}`;
+const assetUrl = withBase(assetPath);
+
+// Stroke animation definitions
+// sweep: 'd'=top→bottom, 'r'=left→right, 'l'=right→left
+// overlap: ms the NEXT stroke starts before this one finishes
+const strokes = [
+  { id: 'stroke_01_initial_S', x: 0, y: 15, w: 730, h: 635, duration: 900, overlap: 250, sweep: 'd' },
+  { id: 'stroke_02_u1', x: 500, y: 220, w: 200, h: 260, duration: 350, overlap: 150, sweep: 'd' },
+  { id: 'stroke_03_s2', x: 620, y: 210, w: 240, h: 280, duration: 400, overlap: 180, sweep: 'l' },
+  { id: 'stroke_04_u2', x: 780, y: 205, w: 215, h: 220, duration: 300, overlap: 150, sweep: 'd' },
+  { id: 'stroke_05_r1', x: 935, y: 200, w: 170, h: 205, duration: 280, overlap: 140, sweep: 'd' },
+  { id: 'stroke_06_r2', x: 1045, y: 200, w: 170, h: 205, duration: 280, overlap: 140, sweep: 'd' },
+  { id: 'stroke_07_i_body', x: 1150, y: 190, w: 135, h: 220, duration: 280, overlap: 140, sweep: 'd' },
+  { id: 'stroke_08_i_mark', x: 1220, y: 115, w: 155, h: 120, duration: 180, overlap: 100, sweep: 'r' },
+  { id: 'stroke_09_u3', x: 1210, y: 195, w: 240, h: 225, duration: 350, overlap: 170, sweep: 'd' },
+  { id: 'stroke_10_m', x: 1365, y: 195, w: 225, h: 230, duration: 400, overlap: 200, sweep: 'd' },
+  { id: 'stroke_11_underline', x: 540, y: 440, w: 1090, h: 140, duration: 600, overlap: 250, sweep: 'l' },
+  { id: 'stroke_12_arrow_flourish', x: 1500, y: 190, w: 485, h: 330, duration: 550, overlap: 200, sweep: 'r' },
+  { id: 'stroke_13_arrow_dot', x: 1935, y: 180, w: 90, h: 65, duration: 120, overlap: 0, sweep: 'r' },
+];
+
+function clipPath(s: typeof strokes[0]) {
+  return `M ${s.x} ${s.y} L ${s.x + s.w} ${s.y} L ${s.x + s.w} ${s.y + s.h} L ${s.x} ${s.y + s.h} Z`;
+}
+---
+
+<div
+  id={signatureId}
+  class:list={['signature-gradient-candidate', className]}
+  data-loop={loop ? 'true' : 'false'}
+  data-guide={showGuide ? 'true' : 'false'}
+  aria-label={label}
+>
+  <svg
+    class="signature-gradient-svg"
+    viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
+    preserveAspectRatio="xMidYMid meet"
+    role="img"
+    aria-labelledby={`${signatureId}-title`}
+  >
+    <title id={`${signatureId}-title`}>{label}</title>
+    <defs>
+      <linearGradient id={`${signatureId}-gradient`} x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#38bdf8" />
+        <stop offset="25%" stop-color="#0ea5e9" />
+        <stop offset="45%" stop-color="#06b6d4" />
+        <stop offset="65%" stop-color="#f59e0b" />
+        <stop offset="85%" stop-color="#f97316" />
+        <stop offset="100%" stop-color="#ea580c" />
+      </linearGradient>
+
+      <filter id={`${signatureId}-brushTexture`} x="-2%" y="-2%" width="104%" height="104%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" seed="3" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+
+      {strokes.map((s) => (
+        <clipPath id={`${signatureId}-clip-${s.id}`} clipPathUnits="userSpaceOnUse">
+          <path d={clipPath(s)} />
+        </clipPath>
+      ))}
+
+      {strokes.map((s) => {
+        const isVert = s.sweep === 'd' || s.sweep === 'u';
+        const gX1 = s.sweep === 'l' ? '1' : '0';
+        const gY1 = s.sweep === 'u' ? '1' : '0';
+        const gX2 = s.sweep === 'l' ? '0' : isVert ? '0' : '1';
+        const gY2 = s.sweep === 'u' ? '0' : isVert ? '1' : '0';
+        return (
+          <>
+            <linearGradient id={`${signatureId}-grad-${s.id}`} x1={gX1} y1={gY1} x2={gX2} y2={gY2}>
+              <stop offset="0%" stop-color="white" />
+              <stop offset="82%" stop-color="white" />
+              <stop offset="93%" stop-color="#888888" />
+              <stop offset="100%" stop-color="black" />
+            </linearGradient>
+            <mask id={`${signatureId}-mask-${s.id}`} maskUnits="userSpaceOnUse" x="0" y="0" width={SVG_WIDTH} height={SVG_HEIGHT}>
+              <rect width={SVG_WIDTH} height={SVG_HEIGHT} fill="black" />
+              <rect
+                id={`${signatureId}-maskRect-${s.id}`}
+                x={s.sweep === 'l' ? String(s.x + s.w) : String(s.x)}
+                y={s.sweep === 'u' ? String(s.y + s.h) : String(s.y)}
+                width={s.sweep === 'r' || s.sweep === 'l' ? '0' : String(s.w)}
+                height={s.sweep === 'd' || s.sweep === 'u' ? '0' : String(s.h)}
+                fill={`url(#${signatureId}-grad-${s.id})`}
+              />
+            </mask>
+          </>
+        );
+      })}
+    </defs>
+
+    <g filter={`url(#${signatureId}-brushTexture)`}>
+      {strokes.map((s) => (
+        <path
+          class="stroke"
+          data-stroke-id={s.id}
+          clip-path={`url(#${signatureId}-clip-${s.id})`}
+          mask={`url(#${signatureId}-mask-${s.id})`}
+          fill={`url(#${signatureId}-gradient)`}
+        />
+      ))}
+    </g>
+  </svg>
+</div>
+
+<style>
+  .signature-gradient-candidate {
+    display: inline-block;
+    position: relative;
+    width: min(760px, 100%);
+    max-width: 100%;
+    aspect-ratio: 2048 / 682;
+  }
+
+  .signature-gradient-candidate[data-guide='true']::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(90deg, transparent 49.5%, rgba(255,255,255,0.4) 49.5%, rgba(255,255,255,0.4) 50.5%, transparent 50.5%),
+      linear-gradient(0deg, transparent 49.5%, rgba(255,255,255,0.4) 49.5%, rgba(255,255,255,0.4) 50.5%, transparent 50.5%);
+    background-size: 10px 10px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .signature-gradient-svg {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 0;
+  }
+
+  .stroke {
+    fill-rule: evenodd;
+    stroke: none;
+  }
+</style>
+
+<script is:inline define:vars={{ strokes, assetPath: assetUrl, signatureId }}>
+  (() => {
+  class SignatureAnimation {
+    constructor(container) {
+      this.container = container;
+      this.svg = container.querySelector('.signature-gradient-svg');
+      this.filledPaths = {};
+      this.maskRects = {};
+      this.strokeConfigs = strokes;
+      this.loop = container.dataset.loop !== 'false';
+      this.reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      this.init();
+    }
+
+    async loadPathData() {
+      try {
+        const response = await fetch(assetPath);
+        const text = await response.text();
+        const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+        for (const config of this.strokeConfigs) {
+          const pathEl = doc.getElementById(config.id);
+          if (pathEl) {
+            this.filledPaths[config.id] = pathEl.getAttribute('d') || '';
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load signature path data:', e);
+      }
+    }
+
+    initFilledPaths() {
+      for (const config of this.strokeConfigs) {
+        const el = this.svg.querySelector(`[data-stroke-id="${config.id}"]`);
+        if (el && this.filledPaths[config.id]) {
+          el.setAttribute('d', this.filledPaths[config.id]);
+        }
+      }
+    }
+
+    initMaskRects() {
+      for (const config of this.strokeConfigs) {
+        const maskRect = this.svg.getElementById(signatureId + '-maskRect-' + config.id);
+        if (maskRect) this.maskRects[config.id] = maskRect;
+      }
+    }
+
+    resetMaskRect(config) {
+      const r = this.maskRects[config.id];
+      if (!r) return;
+      const sw = config.sweep;
+      r.style.transition = 'none';
+      r.setAttribute('fill', 'url(#' + signatureId + '-grad-' + config.id + ')');
+      r.setAttribute('x', sw === 'l' ? String(config.x + config.w) : String(config.x));
+      r.setAttribute('y', sw === 'u' ? String(config.y + config.h) : String(config.y));
+      r.setAttribute('width', sw === 'r' || sw === 'l' ? '0' : String(config.w));
+      r.setAttribute('height', sw === 'd' || sw === 'u' ? '0' : String(config.h));
+    }
+
+    expandMaskRect(config) {
+      const r = this.maskRects[config.id];
+      if (!r) return;
+      const sw = config.sweep;
+      if (sw === 'd') {
+        r.setAttribute('height', String(config.h));
+      } else if (sw === 'r') {
+        r.setAttribute('width', String(config.w));
+      } else if (sw === 'l') {
+        r.setAttribute('x', String(config.x));
+        r.setAttribute('width', String(config.w));
+      } else if (sw === 'u') {
+        r.setAttribute('y', String(config.y));
+        r.setAttribute('height', String(config.h));
+      }
+    }
+
+    async init() {
+      this.container.style.opacity = '0';
+      await this.loadPathData();
+      this.initFilledPaths();
+      this.initMaskRects();
+      if (this.reduceMotion) {
+        this.showFinal();
+        this.container.style.opacity = '1';
+        return;
+      }
+      this.container.style.transition = 'opacity 300ms ease-in';
+      this.container.style.opacity = '1';
+      await this.wait(300);
+      if (this.loop) {
+        this.startLoop();
+      } else {
+        await this.animate();
+      }
+    }
+
+    async animate() {
+      const easing = 'cubic-bezier(0.25, 0.1, 0.25, 1)';
+      const fillPromises = [];
+
+      for (let i = 0; i < this.strokeConfigs.length; i++) {
+        const config = this.strokeConfigs[i];
+        const r = this.maskRects[config.id];
+        if (!r) continue;
+
+        // Reset mask to initial state with gradient (brush tip)
+        this.resetMaskRect(config);
+        void r.getBoundingClientRect();
+
+        // Apply transition
+        const dur = config.duration;
+        r.style.transition = ['width','height','x','y']
+          .map(p => p + ' ' + dur + 'ms ' + easing).join(', ');
+
+        // Expand mask in sweep direction
+        this.expandMaskRect(config);
+
+        // After full duration, switch to solid white so stroke is fully visible
+        fillPromises.push(
+          this.wait(dur).then(() => {
+            r.style.transition = 'none';
+            r.setAttribute('fill', 'white');
+          })
+        );
+
+        // Wait before starting next stroke (account for overlap)
+        await this.wait(Math.max(50, dur - config.overlap));
+      }
+
+      // Wait for all strokes to fully complete
+      await Promise.all(fillPromises);
+    }
+
+    async startLoop() {
+      await this.wait(600);
+      while (true) {
+        if (!this.container.isConnected) return;
+        await this.animate();
+        if (!this.container.isConnected) return;
+        await this.wait(2500);
+        if (!this.container.isConnected) return;
+        await this.fadeOut();
+        if (!this.container.isConnected) return;
+        await this.wait(1000);
+        if (!this.container.isConnected) return;
+        this.reset();
+        await this.wait(600);
+      }
+    }
+
+    fadeOut() {
+      return new Promise((resolve) => {
+        this.container.style.transition = 'opacity 800ms ease-in';
+        this.container.style.opacity = '0';
+        setTimeout(resolve, 800);
+      });
+    }
+
+    reset() {
+      this.container.style.transition = 'none';
+      this.container.style.opacity = '1';
+      for (const config of this.strokeConfigs) {
+        this.resetMaskRect(config);
+      }
+    }
+
+    showFinal() {
+      for (const config of this.strokeConfigs) {
+        this.resetMaskRect(config);
+        this.expandMaskRect(config);
+        const r = this.maskRects[config.id];
+        if (r) r.setAttribute('fill', 'white');
+      }
+    }
+
+    wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+  }
+
+  function initSignature(root) {
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            new SignatureAnimation(entry.target);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      observer.observe(root);
+    } else {
+      new SignatureAnimation(root);
+    }
+  }
+
+  const root = document.getElementById(signatureId);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => root && initSignature(root));
+  } else if (root) {
+    initSignature(root);
+  }
+  })();
+</script>

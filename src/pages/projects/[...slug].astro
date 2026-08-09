@@ -1,8 +1,9 @@
 ---
 import { ArrowLeft, ExternalLink, GitBranch } from '@lucide/astro';
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { formatDate } from '../../lib/content';
+import { withBase } from '../../lib/url';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -17,12 +18,12 @@ interface Props {
 }
 
 const { project } = Astro.props;
-const { Content } = await project.render();
+const { Content } = await render(project);
 ---
 
-<BaseLayout title={project.data.title} description={project.data.description} image={project.data.cover ?? '/images/og.svg'}>
+<BaseLayout title={project.data.title} description={project.data.description} image={project.data.cover ?? '/images/og.png'}>
   <article class="page-wrap max-w-4xl pb-16 pt-10">
-    <a href="/projects/" class="focus-ring inline-flex items-center gap-2 rounded-md text-sm text-[var(--muted)] transition hover:text-[var(--accent)]">
+    <a href={withBase('/projects/')} class="focus-ring inline-flex items-center gap-2 rounded-md text-sm text-[var(--muted)] transition hover:text-[var(--accent)]">
       <ArrowLeft class="h-4 w-4" aria-hidden="true" />
       返回项目
     </a>
@@ -55,7 +56,7 @@ const { Content } = await project.render();
       </div>
     </header>
 
-    {project.data.cover && <img src={project.data.cover} alt="" class="mt-8 aspect-[16/9] w-full rounded-lg border border-[var(--line)] object-cover" />}
+    {project.data.cover && <img src={withBase(project.data.cover)} alt="" class="mt-8 aspect-[16/9] w-full rounded-lg border border-[var(--line)] object-cover" />}
 
     <div class="prose mt-10">
       <Content />

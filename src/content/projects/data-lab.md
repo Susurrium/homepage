@@ -5,7 +5,6 @@ date: 2026-02-15
 role: "数据分析 / 前端展示"
 status: "进行中"
 stack: ["Python", "Pandas", "Visualization", "Astro"]
-repo: "https://github.com/yourname/data-lab"
 cover: "/images/project-data.svg"
 featured: true
 ---

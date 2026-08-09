@@ -1,7 +1,9 @@
 import { site } from '../data/site';
+import { withBase } from '../lib/url';
 
 export function GET({ site: astroSite }: { site?: URL }) {
-  const base = astroSite?.toString().replace(/\/$/, '') ?? site.url;
+  const origin = astroSite ?? new URL(site.url);
+  const base = new URL(withBase('/'), origin).toString().replace(/\/$/, '');
 
   return new Response(`User-agent: *\nAllow: /\n\nSitemap: ${base}/sitemap-index.xml\n`, {
     headers: {

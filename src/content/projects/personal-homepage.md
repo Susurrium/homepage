@@ -5,8 +5,8 @@ date: 2026-05-11
 role: "设计与开发"
 status: "维护中"
 stack: ["Astro", "TypeScript", "Tailwind CSS", "Pagefind"]
-demo: "https://example.com"
-repo: "https://github.com/yourname/homepage"
+demo: "https://susurrium.github.io/homepage/"
+repo: "https://github.com/Susurrium/homepage"
 cover: "/images/project-homepage.svg"
 featured: true
 ---

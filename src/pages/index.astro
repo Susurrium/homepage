@@ -1,14 +1,24 @@
 ---
 import { ArrowRight, MapPin, Sparkles } from '@lucide/astro';
 import { getCollection } from 'astro:content';
+import DynamicSignature from '../components/DynamicSignature.astro';
 import PostCard from '../components/PostCard.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site } from '../data/site';
 import { published, sortByDate } from '../lib/content';
+import { withBase } from '../lib/url';
 
-const posts = sortByDate(published(await getCollection('blog'))).slice(0, 3);
-const projects = sortByDate(await getCollection('projects')).filter((project) => project.data.featured).slice(0, 2);
+const allPosts = sortByDate(published(await getCollection('blog')));
+const allProjects = sortByDate(await getCollection('projects'));
+const publications = await getCollection('publications');
+const posts = allPosts.slice(0, 3);
+const projects = allProjects.filter((project) => project.data.featured).slice(0, 2);
+const stats = [
+  { label: '文章', value: String(allPosts.length) },
+  { label: '项目', value: String(allProjects.length) },
+  { label: '成果', value: String(publications.length) }
+];
 ---
 
 <BaseLayout title={site.title} description={site.description}>
@@ -24,37 +34,34 @@ const projects = sortByDate(await getCollection('projects')).filter((project) =>
       <p class="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">{site.profile.summary}</p>
 
       <div class="mt-7 flex flex-wrap gap-3">
-        <a href="/blog/" class="focus-ring inline-flex items-center gap-2 rounded-md bg-[var(--text)] px-4 py-3 text-sm font-medium text-[var(--bg)] transition hover:opacity-90">
+        <a href={withBase('/blog/')} class="focus-ring inline-flex items-center gap-2 rounded-md bg-[var(--text)] px-4 py-3 text-sm font-medium text-[var(--bg)] transition hover:opacity-90">
           阅读博客
           <ArrowRight class="h-4 w-4" aria-hidden="true" />
         </a>
-        <a href="/about/" class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm font-medium transition hover:border-[var(--accent)]">
+        <a href={withBase('/about/')} class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm font-medium transition hover:border-[var(--accent)]">
           了解更多
         </a>
       </div>
 
-      <iframe
-        src="/signature/index.html"
-        title={`${site.author} 的动态签名`}
-        class="mt-9 aspect-[2172/724] w-full max-w-[720px] border-0"
-        loading="eager"
-      ></iframe>
+      <DynamicSignature class="mt-9" label={`${site.author} 的动态手写签名`} />
 
       <div class="mt-8 flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
-        <span class="inline-flex items-center gap-2">
-          <MapPin class="h-4 w-4" aria-hidden="true" />
-          {site.location}
-        </span>
+        {site.location && (
+          <span class="inline-flex items-center gap-2">
+            <MapPin class="h-4 w-4" aria-hidden="true" />
+            {site.location}
+          </span>
+        )}
         {site.profile.keywords.map((keyword) => <span class="chip">{keyword}</span>)}
       </div>
     </div>
 
     <div>
       <div class="surface rounded-lg p-5">
-        <img src="/images/profile.svg" alt="个人主页视觉卡片" class="w-full rounded-md" />
+        <img src={withBase(site.avatar)} alt="Susurrium 个人主页视觉卡片" class="w-full rounded-md" />
         <div class="mt-5 grid grid-cols-3 gap-3">
           {
-            site.stats.map((stat) => (
+            stats.map((stat) => (
               <div class="rounded-md border border-[var(--line)] bg-[var(--surface-soft)] p-3">
                 <p class="text-2xl font-semibold">{stat.value}</p>
                 <p class="mt-1 text-xs text-[var(--muted)]">{stat.label}</p>
@@ -87,7 +94,7 @@ const projects = sortByDate(await getCollection('projects')).filter((project) =>
         <p class="text-sm font-medium text-[var(--accent)]">Blog</p>
         <h2 class="mt-2 text-3xl font-semibold">最新文章</h2>
       </div>
-      <a href="/blog/" class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--text)]">
+      <a href={withBase('/blog/')} class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--text)]">
         全部文章
         <ArrowRight class="h-4 w-4" aria-hidden="true" />
       </a>
@@ -104,7 +111,7 @@ const projects = sortByDate(await getCollection('projects')).filter((project) =>
           <p class="text-sm font-medium text-[var(--accent)]">Projects</p>
           <h2 class="mt-2 text-3xl font-semibold">代表项目</h2>
         </div>
-        <a href="/projects/" class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--text)]">
+        <a href={withBase('/projects/')} class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--text)]">
           查看项目
           <ArrowRight class="h-4 w-4" aria-hidden="true" />
         </a>

@@ -1,8 +1,9 @@
 ---
 import { ArrowLeft } from '@lucide/astro';
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { formatDate, published, readingTime, sortByDate } from '../../lib/content';
+import { withBase } from '../../lib/url';
 
 export async function getStaticPaths() {
   const posts = published(await getCollection('blog'));
@@ -17,7 +18,7 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content, headings } = await post.render();
+const { Content, headings } = await render(post);
 const posts = sortByDate(published(await getCollection('blog')));
 const index = posts.findIndex((item) => item.id === post.id);
 const prev = posts[index + 1];
@@ -25,17 +26,17 @@ const next = posts[index - 1];
 const toc = headings.filter((heading) => heading.depth < 4);
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description} type="article" image={post.data.hero ?? '/images/og.svg'}>
+<BaseLayout title={post.data.title} description={post.data.description} type="article" image={post.data.hero ?? '/images/og.png'}>
   <article class="page-wrap grid gap-10 pb-16 pt-10 lg:grid-cols-[minmax(0,1fr)_260px]">
     <div class="min-w-0">
-      <a href="/blog/" class="focus-ring inline-flex items-center gap-2 rounded-md text-sm text-[var(--muted)] transition hover:text-[var(--accent)]">
+      <a href={withBase('/blog/')} class="focus-ring inline-flex items-center gap-2 rounded-md text-sm text-[var(--muted)] transition hover:text-[var(--accent)]">
         <ArrowLeft class="h-4 w-4" aria-hidden="true" />
         返回博客
       </a>
       <header class="mt-8">
         <div class="flex flex-wrap gap-2">
           <span class="chip">{post.data.category}</span>
-          {post.data.tags.map((tag) => <a href={`/tags/${encodeURIComponent(tag)}/`} class="chip hover:border-[var(--accent)]">#{tag}</a>)}
+          {post.data.tags.map((tag) => <a href={withBase(`/tags/${encodeURIComponent(tag)}/`)} class="chip hover:border-[var(--accent)]">#{tag}</a>)}
         </div>
         <h1 class="mt-5 text-4xl font-semibold leading-tight tracking-normal sm:text-5xl">{post.data.title}</h1>
         <p class="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]">{post.data.description}</p>
@@ -48,7 +49,7 @@ const toc = headings.filter((heading) => heading.depth < 4);
 
       {
         post.data.hero && (
-          <img src={post.data.hero} alt="" class="mt-8 aspect-[16/9] w-full rounded-lg border border-[var(--line)] object-cover" />
+          <img src={withBase(post.data.hero)} alt="" class="mt-8 aspect-[16/9] w-full rounded-lg border border-[var(--line)] object-cover" />
         )
       }
 
@@ -59,7 +60,7 @@ const toc = headings.filter((heading) => heading.depth < 4);
       <nav class="mt-12 grid gap-3 border-t border-[var(--line)] pt-8 sm:grid-cols-2" aria-label="上一篇和下一篇文章">
         {
           prev && (
-            <a href={`/blog/${prev.id}/`} class="focus-ring rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4 transition hover:border-[var(--accent)]">
+            <a href={withBase(`/blog/${prev.id}/`)} class="focus-ring rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4 transition hover:border-[var(--accent)]">
               <span class="text-sm text-[var(--muted)]">上一篇</span>
               <span class="mt-1 block font-medium">{prev.data.title}</span>
             </a>
@@ -67,7 +68,7 @@ const toc = headings.filter((heading) => heading.depth < 4);
         }
         {
           next && (
-            <a href={`/blog/${next.id}/`} class="focus-ring rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4 transition hover:border-[var(--accent)] sm:text-right">
+            <a href={withBase(`/blog/${next.id}/`)} class="focus-ring rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4 transition hover:border-[var(--accent)] sm:text-right">
               <span class="text-sm text-[var(--muted)]">下一篇</span>
               <span class="mt-1 block font-medium">{next.data.title}</span>
             </a>

@@ -9,17 +9,24 @@
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist --output-subdir pagefind",
     "build:astro": "astro build",
+    "check": "astro check",
+    "verify:build": "node scripts/verify-build.mjs",
+    "test": "npm run check && npm run build && npm run verify:build",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/rss": "^4.0.18",
+    "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.2",
-    "@lucide/astro": "^1.14.0",
+    "@lucide/astro": "^1.31.0",
     "@tailwindcss/vite": "^4.3.0",
-    "astro": "^6.3.1",
+    "astro": "^7.2.0",
     "clsx": "^2.1.1",
     "pagefind": "^1.5.2",
     "tailwindcss": "^4.3.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^6.0.3"
   }
 }
