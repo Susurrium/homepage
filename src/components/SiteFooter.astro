@@ -1,5 +1,5 @@
 ---
-import { GitBranch, Mail, Rss } from '@lucide/astro';
+import { ArrowUp, GitBranch, Mail, Rss } from '@lucide/astro';
 import { site } from '../data/site';
 import { withBase } from '../lib/url';
 
@@ -33,3 +33,117 @@ const icons = { github: GitBranch, mail: Mail, rss: Rss };
     </div>
   </div>
 </footer>
+
+<button
+  type="button"
+  class="back-to-top focus-ring"
+  aria-label="返回页面顶部"
+  aria-hidden="true"
+  tabindex="-1"
+  data-back-to-top
+>
+  <ArrowUp class="h-5 w-5" aria-hidden="true" />
+</button>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('[data-back-to-top]');
+
+  if (button) {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const main = document.querySelector<HTMLElement>('#main');
+    let animationFrame = 0;
+    let disposed = false;
+
+    const focusMain = () => main?.focus({ preventScroll: true });
+
+    const updateVisibility = () => {
+      animationFrame = 0;
+      const isVisible = window.scrollY > 400;
+
+      button.classList.toggle('is-visible', isVisible);
+      button.tabIndex = isVisible ? 0 : -1;
+
+      if (isVisible) {
+        button.removeAttribute('aria-hidden');
+      } else {
+        button.setAttribute('aria-hidden', 'true');
+        if (document.activeElement === button) focusMain();
+      }
+    };
+
+    const handleScroll = () => {
+      if (!animationFrame) animationFrame = window.requestAnimationFrame(updateVisibility);
+    };
+
+    const scrollToTop = () => {
+      window.scrollTo({
+        top: 0,
+        behavior: reducedMotion.matches ? 'auto' : 'smooth',
+      });
+      focusMain();
+    };
+
+    const cleanup = () => {
+      if (disposed) return;
+      disposed = true;
+      window.removeEventListener('scroll', handleScroll);
+      button.removeEventListener('click', scrollToTop);
+      document.removeEventListener('astro:before-swap', cleanup);
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    button.addEventListener('click', scrollToTop);
+    document.addEventListener('astro:before-swap', cleanup, { once: true });
+    updateVisibility();
+  }
+</script>
+
+<style>
+  .back-to-top {
+    position: fixed;
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    z-index: 40;
+    display: inline-flex;
+    width: 2.75rem;
+    height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    border-radius: 9999px;
+    background: var(--surface);
+    color: var(--muted);
+    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 12%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(0.5rem);
+    transition:
+      opacity 200ms ease,
+      transform 200ms ease,
+      visibility 0s linear 200ms,
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .back-to-top.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+    transition-delay: 0s;
+  }
+
+  .back-to-top:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .back-to-top {
+      transform: none;
+      transition: none;
+    }
+  }
+</style>

@@ -11,23 +11,30 @@ const isActive = (href: string) => {
 };
 ---
 
-<header class="sticky top-0 z-40 border-b border-[var(--line)] bg-[color-mix(in_srgb,var(--bg)_82%,transparent)] backdrop-blur-xl">
+<header
+  class="sticky top-0 z-40 border-b border-[var(--line)] bg-[color-mix(in_srgb,var(--bg)_82%,transparent)] backdrop-blur-xl"
+  data-site-header
+>
   <div class="page-wrap flex min-h-16 items-center gap-4 py-3">
-    <a href={withBase('/')} class="focus-ring flex shrink-0 items-center gap-3 rounded-md" aria-label="返回首页">
+    <a
+      href={withBase('/')}
+      class="focus-ring flex shrink-0 items-center gap-3 rounded-md transition-opacity hover:opacity-80"
+      aria-label="返回首页"
+    >
       <img src={withBase(site.avatar)} alt="" class="h-10 w-10 rounded-md border border-[var(--line)] bg-[var(--surface)]" />
       <span class="hidden font-semibold sm:inline">{site.shortTitle}</span>
     </a>
 
-    <nav class="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto px-1" aria-label="主导航">
+    <nav class="hidden min-w-0 flex-1 items-center gap-1 px-1 md:flex" aria-label="主导航">
       {
         site.nav.map((item) => (
           <a
             href={withBase(item.href)}
             aria-current={isActive(item.href) ? 'page' : undefined}
             class:list={[
-              'focus-ring shrink-0 rounded-md px-3 py-2 text-sm transition',
+              'desktop-nav-link focus-ring shrink-0 rounded-md px-3 py-2 text-sm transition-colors',
               isActive(item.href)
-                ? 'bg-[var(--surface-soft)] text-[var(--text)]'
+                ? 'bg-[var(--surface-soft)] font-medium text-[var(--text)]'
                 : 'text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
             ]}
           >
@@ -37,14 +44,298 @@ const isActive = (href: string) => {
       }
     </nav>
 
-    <a
-      href={withBase('/search/')}
-      class="focus-ring inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[var(--line)] bg-[var(--surface)] transition hover:border-[var(--accent)]"
-      aria-label="搜索"
-      title="搜索"
-    >
-      <Search class="h-4 w-4" aria-hidden="true" />
-    </a>
-    <ThemeToggle />
+    <div class="ml-auto flex shrink-0 items-center gap-2 md:ml-0">
+      <a
+        href={withBase('/search/')}
+        class="focus-ring inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+        aria-label="搜索"
+        title="搜索"
+      >
+        <Search class="h-4 w-4" aria-hidden="true" />
+      </a>
+      <ThemeToggle />
+      <button
+        type="button"
+        class="hamburger focus-ring inline-flex h-10 w-10 shrink-0 flex-col items-center justify-center gap-[5px] rounded-md border border-[var(--line)] bg-[var(--surface)] md:hidden"
+        aria-label="打开菜单"
+        aria-controls="mobile-site-navigation"
+        aria-expanded="false"
+        data-mobile-menu-toggle
+      >
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </button>
+    </div>
   </div>
 </header>
+
+<div
+  id="mobile-site-navigation"
+  class="mobile-nav-overlay md:hidden"
+  aria-hidden="true"
+  inert
+  data-mobile-menu-overlay
+>
+  <nav class="mobile-nav-panel" aria-label="移动端导航" data-mobile-menu-panel>
+    {
+      site.nav.map((item) => (
+        <a
+          href={withBase(item.href)}
+          aria-current={isActive(item.href) ? 'page' : undefined}
+          class:list={['focus-ring mobile-nav-link', isActive(item.href) && 'is-active']}
+          data-mobile-menu-link
+        >
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+</div>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-mobile-menu-toggle]');
+  const overlay = document.querySelector<HTMLElement>('[data-mobile-menu-overlay]');
+  const panel = overlay?.querySelector<HTMLElement>('[data-mobile-menu-panel]');
+  const desktopMedia = window.matchMedia('(min-width: 768px)');
+
+  if (toggle && overlay && panel) {
+    const links = Array.from(overlay.querySelectorAll<HTMLAnchorElement>('[data-mobile-menu-link]'));
+    let previousBodyOverflow = '';
+    let focusFrame: number | undefined;
+    let isOpen = false;
+
+    const open = () => {
+      if (isOpen || desktopMedia.matches) return;
+
+      isOpen = true;
+      previousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      overlay.inert = false;
+      toggle.classList.add('is-open');
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-label', '关闭菜单');
+      overlay.classList.add('is-open');
+      overlay.setAttribute('aria-hidden', 'false');
+
+      focusFrame = window.requestAnimationFrame(() => {
+        focusFrame = undefined;
+        if (isOpen) links[0]?.focus();
+      });
+    };
+
+    const close = ({ restoreFocus = true } = {}) => {
+      if (!isOpen) return;
+
+      isOpen = false;
+      if (focusFrame !== undefined) {
+        window.cancelAnimationFrame(focusFrame);
+        focusFrame = undefined;
+      }
+      document.body.style.overflow = previousBodyOverflow;
+      toggle.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', '打开菜单');
+
+      if (restoreFocus && !desktopMedia.matches) {
+        toggle.focus();
+      }
+
+      overlay.classList.remove('is-open');
+      overlay.setAttribute('aria-hidden', 'true');
+      overlay.inert = true;
+    };
+
+    const onToggleClick = () => {
+      if (isOpen) close();
+      else open();
+    };
+
+    const onOverlayClick = (event: MouseEvent) => {
+      if (event.target === overlay) close();
+    };
+
+    const onDocumentKeydown = (event: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        close();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const focusableElements = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '[data-site-header] a[href], [data-site-header] button:not([disabled]), [data-mobile-menu-link]'
+        )
+      ).filter((element) => element.getClientRects().length > 0 && !element.closest('[inert]'));
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements.at(-1);
+      const activeElement = document.activeElement as HTMLElement | null;
+
+      if (!firstElement || !lastElement) return;
+
+      if (!activeElement || !focusableElements.includes(activeElement)) {
+        event.preventDefault();
+        links[0]?.focus();
+      } else if (event.shiftKey && activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    const onDesktopChange = (event: MediaQueryListEvent) => {
+      if (event.matches) close({ restoreFocus: false });
+    };
+
+    const onPageHide = () => {
+      if (isOpen) close({ restoreFocus: false });
+    };
+
+    toggle.addEventListener('click', onToggleClick);
+    overlay.addEventListener('click', onOverlayClick);
+    document.addEventListener('keydown', onDocumentKeydown);
+    desktopMedia.addEventListener('change', onDesktopChange);
+    links.forEach((link) => link.addEventListener('click', () => close()));
+    window.addEventListener('pagehide', onPageHide);
+  }
+</script>
+
+<style>
+  .desktop-nav-link {
+    position: relative;
+  }
+
+  .desktop-nav-link::after {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.3rem;
+    left: 0.75rem;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--accent);
+    content: '';
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 220ms ease;
+  }
+
+  .desktop-nav-link:hover::after,
+  .desktop-nav-link:focus-visible::after,
+  .desktop-nav-link[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+
+  .hamburger > span {
+    width: 1.15rem;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    transition: transform 220ms ease, opacity 180ms ease;
+  }
+
+  .hamburger.is-open > span:first-child {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .hamburger.is-open > span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger.is-open > span:last-child {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  .mobile-nav-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    overflow-y: auto;
+    padding: 5.5rem 1rem 1rem;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(14px);
+    opacity: 0;
+    overscroll-behavior: contain;
+    pointer-events: none;
+    transition: opacity 220ms ease, visibility 220ms ease;
+    visibility: hidden;
+  }
+
+  .mobile-nav-overlay.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .mobile-nav-panel {
+    display: grid;
+    width: min(100%, 32rem);
+    margin-inline: auto;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    box-shadow: 0 24px 70px rgba(18, 25, 38, 0.16);
+    transform: translateY(-0.75rem) scale(0.985);
+    transition: transform 220ms ease;
+  }
+
+  .mobile-nav-overlay.is-open .mobile-nav-panel {
+    transform: translateY(0) scale(1);
+  }
+
+  .mobile-nav-link {
+    display: flex;
+    min-height: 3.5rem;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+    padding: 0.75rem 1rem;
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 180ms ease, color 180ms ease;
+  }
+
+  .mobile-nav-link:last-child {
+    border-bottom: 0;
+  }
+
+  .mobile-nav-link::after {
+    color: var(--accent);
+    content: '\2192';
+    opacity: 0;
+    transform: translateX(-0.25rem);
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .mobile-nav-link:hover,
+  .mobile-nav-link:focus-visible,
+  .mobile-nav-link.is-active {
+    background: var(--surface-soft);
+    color: var(--text);
+  }
+
+  .mobile-nav-link:hover::after,
+  .mobile-nav-link:focus-visible::after,
+  .mobile-nav-link.is-active::after {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .desktop-nav-link::after,
+    .hamburger > span,
+    .mobile-nav-overlay,
+    .mobile-nav-panel,
+    .mobile-nav-link,
+    .mobile-nav-link::after {
+      transition-duration: 0.01ms;
+    }
+  }
+</style>

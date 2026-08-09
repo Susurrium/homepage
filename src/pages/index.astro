@@ -23,20 +23,27 @@ const stats = [
 
 <BaseLayout title={site.title} description={site.description}>
   <section class="page-wrap grid gap-10 pb-12 pt-12 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:pb-20 lg:pt-16">
-    <div>
+    <div class="animate-fade-up">
       <p class="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-sm text-[var(--muted)]">
         <Sparkles class="h-4 w-4 text-[var(--accent)]" aria-hidden="true" />
         {site.profile.availability}
       </p>
       <h1 class="mt-6 max-w-3xl text-5xl font-semibold leading-tight tracking-normal sm:text-6xl">
-        {site.profile.headline}
+        {
+          site.profile.headline.split('、').map((segment, index, segments) => (
+            <>
+              {index > 0 && <span class="gradient-text">、</span>}
+              {index === segments.length - 1 ? <span class="gradient-text">{segment}</span> : segment}
+            </>
+          ))
+        }
       </h1>
       <p class="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">{site.profile.summary}</p>
 
       <div class="mt-7 flex flex-wrap gap-3">
-        <a href={withBase('/blog/')} class="focus-ring inline-flex items-center gap-2 rounded-md bg-[var(--text)] px-4 py-3 text-sm font-medium text-[var(--bg)] transition hover:opacity-90">
+        <a href={withBase('/blog/')} class="focus-ring group inline-flex items-center gap-2 rounded-md bg-[var(--text)] px-4 py-3 text-sm font-medium text-[var(--bg)] transition hover:opacity-90">
           阅读博客
-          <ArrowRight class="h-4 w-4" aria-hidden="true" />
+          <ArrowRight class="h-4 w-4 motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5" aria-hidden="true" />
         </a>
         <a href={withBase('/about/')} class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm font-medium transition hover:border-[var(--accent)]">
           了解更多
@@ -56,13 +63,13 @@ const stats = [
       </div>
     </div>
 
-    <div>
-      <div class="surface rounded-lg p-5">
+    <div class="animate-fade-up stagger-2">
+      <div class="surface profile-float rounded-lg p-5">
         <img src={withBase(site.avatar)} alt="Susurrium 个人主页视觉卡片" class="w-full rounded-md" />
         <div class="mt-5 grid grid-cols-3 gap-3">
           {
             stats.map((stat) => (
-              <div class="rounded-md border border-[var(--line)] bg-[var(--surface-soft)] p-3">
+              <div class="rounded-md border border-[var(--line)] bg-[var(--surface-soft)] p-3 transition-colors hover:border-[var(--accent)]">
                 <p class="text-2xl font-semibold">{stat.value}</p>
                 <p class="mt-1 text-xs text-[var(--muted)]">{stat.label}</p>
               </div>
@@ -74,7 +81,7 @@ const stats = [
   </section>
 
   <section class="border-y border-[var(--line)] bg-[color-mix(in_srgb,var(--surface)_52%,transparent)]">
-    <div class="page-wrap grid gap-8 py-12 lg:grid-cols-3">
+    <div class="page-wrap reveal grid gap-8 py-12 lg:grid-cols-3">
       {
         site.skills.map((group) => (
           <div>
@@ -89,35 +96,47 @@ const stats = [
   </section>
 
   <section class="section page-wrap">
-    <div class="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div class="reveal mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <p class="text-sm font-medium text-[var(--accent)]">Blog</p>
         <h2 class="mt-2 text-3xl font-semibold">最新文章</h2>
       </div>
-      <a href={withBase('/blog/')} class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--text)]">
+      <a href={withBase('/blog/')} class="focus-ring group inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--text)]">
         全部文章
-        <ArrowRight class="h-4 w-4" aria-hidden="true" />
+        <ArrowRight class="h-4 w-4 motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5" aria-hidden="true" />
       </a>
     </div>
     <div class="grid gap-4">
-      {posts.map((post) => <PostCard post={post} />)}
+      {
+        posts.map((post, index) => (
+          <div class="reveal" style={`transition-delay: ${(index + 1) * 80}ms`}>
+            <PostCard post={post} />
+          </div>
+        ))
+      }
     </div>
   </section>
 
   <section class="section border-t border-[var(--line)]">
     <div class="page-wrap">
-      <div class="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div class="reveal mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p class="text-sm font-medium text-[var(--accent)]">Projects</p>
           <h2 class="mt-2 text-3xl font-semibold">代表项目</h2>
         </div>
-        <a href={withBase('/projects/')} class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--text)]">
+        <a href={withBase('/projects/')} class="focus-ring group inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm text-[var(--muted)] transition hover:border-[var(--accent)] hover:text-[var(--text)]">
           查看项目
-          <ArrowRight class="h-4 w-4" aria-hidden="true" />
+          <ArrowRight class="h-4 w-4 motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5" aria-hidden="true" />
         </a>
       </div>
       <div class="grid gap-5 md:grid-cols-2">
-        {projects.map((project) => <ProjectCard project={project} />)}
+        {
+          projects.map((project, index) => (
+            <div class="reveal" style={`transition-delay: ${(index + 1) * 100}ms`}>
+              <ProjectCard project={project} />
+            </div>
+          ))
+        }
       </div>
     </div>
   </section>
