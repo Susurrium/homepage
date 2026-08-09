@@ -19,7 +19,13 @@ const tags = allTags(posts);
     </div>
     {posts.length > 0 ? (
       <div class="grid gap-4">
-        {posts.map((post) => <PostCard post={post} />)}
+        {
+          posts.map((post, index) => (
+            <div class="reveal" style={`transition-delay: ${(index + 1) * 60}ms`}>
+              <PostCard post={post} />
+            </div>
+          ))
+        }
       </div>
     ) : (
       <p class="surface rounded-lg p-5 text-sm text-[var(--muted)]">暂无已发布文章。</p>

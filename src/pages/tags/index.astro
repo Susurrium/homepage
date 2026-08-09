@@ -12,7 +12,7 @@ const tags = allTags(published(await getCollection('blog')));
   <PageHero eyebrow="Tags" title="标签" description="按主题浏览文章。" />
   <section class="page-wrap flex flex-wrap gap-3 pb-16">
     {tags.length > 0 ? (
-      tags.map((tag) => <a href={withBase(`/tags/${encodeURIComponent(tag.name)}/`)} class="chip hover:border-[var(--accent)]">#{tag.name} {tag.count}</a>)
+      tags.map((tag, index) => <a href={withBase(`/tags/${encodeURIComponent(tag.name)}/`)} class="reveal chip hover:border-[var(--accent)]" style={`transition-delay: ${(index + 1) * 40}ms`}>#{tag.name} {tag.count}</a>)
     ) : (
       <p class="surface w-full rounded-lg p-5 text-sm text-[var(--muted)]">暂无文章标签。</p>
     )}

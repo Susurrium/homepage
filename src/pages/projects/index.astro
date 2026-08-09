@@ -12,7 +12,11 @@ const projects = sortByDate(await getCollection('projects'));
   <PageHero eyebrow="Projects" title="项目" description="把课程项目、开源作品、研究工具和产品原型集中展示。每个项目都可以补充技术栈、链接和复盘文章。" />
   <section class="page-wrap grid gap-5 pb-16 md:grid-cols-2">
     {projects.length > 0 ? (
-      projects.map((project) => <ProjectCard project={project} />)
+      projects.map((project, index) => (
+        <div class="reveal" style={`transition-delay: ${(index + 1) * 80}ms`}>
+          <ProjectCard project={project} />
+        </div>
+      ))
     ) : (
       <p class="surface rounded-lg p-5 text-sm text-[var(--muted)] md:col-span-2">暂无公开项目。</p>
     )}

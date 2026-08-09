@@ -23,12 +23,12 @@ const { Content } = await render(project);
 
 <BaseLayout title={project.data.title} description={project.data.description} image={project.data.cover ?? '/images/og.png'}>
   <article class="page-wrap max-w-4xl pb-16 pt-10">
-    <a href={withBase('/projects/')} class="focus-ring inline-flex items-center gap-2 rounded-md text-sm text-[var(--muted)] transition hover:text-[var(--accent)]">
+    <a href={withBase('/projects/')} class="focus-ring animate-fade-up inline-flex items-center gap-2 rounded-md text-sm text-[var(--muted)] transition hover:text-[var(--accent)]">
       <ArrowLeft class="h-4 w-4" aria-hidden="true" />
       返回项目
     </a>
 
-    <header class="mt-8">
+    <header class="animate-fade-up mt-8">
       <span class="chip">{project.data.status}</span>
       <h1 class="mt-5 text-4xl font-semibold tracking-normal sm:text-5xl">{project.data.title}</h1>
       <p class="mt-4 text-base leading-7 text-[var(--muted)]">{project.data.description}</p>
@@ -39,7 +39,7 @@ const { Content } = await render(project);
       <div class="mt-6 flex flex-wrap gap-3">
         {
           project.data.demo && (
-            <a href={project.data.demo} class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm transition hover:border-[var(--accent)]" target="_blank" rel="noreferrer">
+            <a href={project.data.demo} class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm transition hover:border-[var(--accent)] hover:text-[var(--accent)]" target="_blank" rel="noreferrer">
               <ExternalLink class="h-4 w-4" aria-hidden="true" />
               Demo
             </a>
@@ -47,7 +47,7 @@ const { Content } = await render(project);
         }
         {
           project.data.repo && (
-            <a href={project.data.repo} class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm transition hover:border-[var(--accent)]" target="_blank" rel="noreferrer">
+            <a href={project.data.repo} class="focus-ring inline-flex items-center gap-2 rounded-md border border-[var(--line)] px-3 py-2 text-sm transition hover:border-[var(--accent)] hover:text-[var(--accent)]" target="_blank" rel="noreferrer">
               <GitBranch class="h-4 w-4" aria-hidden="true" />
               Code
             </a>
@@ -56,7 +56,7 @@ const { Content } = await render(project);
       </div>
     </header>
 
-    {project.data.cover && <img src={withBase(project.data.cover)} alt="" class="mt-8 aspect-[16/9] w-full rounded-lg border border-[var(--line)] object-cover" />}
+    {project.data.cover && <img src={withBase(project.data.cover)} alt="" class="animate-fade-up mt-8 aspect-[16/9] w-full rounded-lg border border-[var(--line)] object-cover" />}
 
     <div class="prose mt-10">
       <Content />

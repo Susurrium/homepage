@@ -262,6 +262,29 @@
   transform: translateY(0);
 }
 
+.link-underline {
+  position: relative;
+}
+
+.link-underline::after {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--accent);
+  content: "";
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--motion-ease-out);
+}
+
+.link-underline:hover::after,
+.link-underline:focus-visible::after {
+  transform: scaleX(1);
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .animate-fade-up {
     animation: fade-up 0.7s var(--motion-ease-out) both;
@@ -286,6 +309,10 @@
   .reveal.reveal-ready.is-visible {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+
+  .link-underline::after {
     transition: none;
   }
 }

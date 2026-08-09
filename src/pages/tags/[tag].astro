@@ -20,6 +20,12 @@ const sortedPosts = sortByDate(posts);
 <BaseLayout title={`标签：${tag}`} description={`浏览标签 ${tag} 下的文章。`}>
   <PageHero eyebrow="Tag" title={`#${tag}`} description={`${sortedPosts.length} 篇文章`} />
   <section class="page-wrap grid gap-4 pb-16">
-    {sortedPosts.map((post) => <PostCard post={post} />)}
+    {
+      sortedPosts.map((post, index) => (
+        <div class="reveal" style={`transition-delay: ${(index + 1) * 60}ms`}>
+          <PostCard post={post} />
+        </div>
+      ))
+    }
   </section>
 </BaseLayout>
