@@ -1,0 +1,72 @@
+---
+import { CalendarDays } from '@lucide/astro';
+import type { CollectionEntry } from 'astro:content';
+import { groupByYear, tagPathSegment } from '../lib/content';
+import { withBase } from '../lib/url';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+}
+
+const { posts } = Astro.props;
+const groups = groupByYear(posts);
+const archiveDate = new Intl.DateTimeFormat('zh-CN', {
+  month: '2-digit',
+  day: '2-digit'
+});
+---
+
+{
+  groups.length > 0 ? (
+    <div class="space-y-10">
+      {groups.map((group, groupIndex) => (
+        <section
+          class="reveal grid gap-4 sm:grid-cols-[7rem_minmax(0,1fr)]"
+          style={`transition-delay: ${(groupIndex + 1) * 60}ms`}
+          aria-labelledby={`year-${group.year}`}
+        >
+          <div>
+            <h2 id={`year-${group.year}`} class="text-3xl font-semibold text-[var(--accent)]">
+              {group.year}
+            </h2>
+            <p class="mt-1 text-sm text-[var(--muted)]">{group.posts.length} 篇</p>
+          </div>
+
+          <ol class="grid gap-3">
+            {group.posts.map((post) => (
+              <li class="surface rounded-lg p-4 sm:flex sm:items-start sm:gap-5">
+                <time
+                  datetime={post.data.date.toISOString()}
+                  class="mb-2 flex shrink-0 items-center gap-2 text-sm text-[var(--muted)] sm:mb-0 sm:w-20"
+                >
+                  <CalendarDays class="h-4 w-4" aria-hidden="true" />
+                  {archiveDate.format(post.data.date)}
+                </time>
+                <div class="min-w-0 flex-1">
+                  <a
+                    href={withBase(`/blog/${post.id}/`)}
+                    class="focus-ring rounded text-base font-medium hover:text-[var(--accent)]"
+                  >
+                    {post.data.title}
+                  </a>
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    {post.data.tags.map((tag) => (
+                      <a
+                        href={withBase(`/tags/${tagPathSegment(tag)}/`)}
+                        class="focus-ring chip hover:border-[var(--accent)]"
+                      >
+                        #{tag}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))}
+    </div>
+  ) : (
+    <p class="surface rounded-lg p-5 text-sm text-[var(--muted)]">暂无已发布文章。</p>
+  )
+}

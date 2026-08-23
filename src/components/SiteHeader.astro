@@ -118,9 +118,10 @@ const isActive = (href: string) => {
       overlay.classList.add('is-open');
       overlay.setAttribute('aria-hidden', 'false');
 
+      links[0]?.focus({ preventScroll: true });
       focusFrame = window.requestAnimationFrame(() => {
         focusFrame = undefined;
-        if (isOpen) links[0]?.focus();
+        if (isOpen) links[0]?.focus({ preventScroll: true });
       });
     };
 
@@ -262,13 +263,14 @@ const isActive = (href: string) => {
     opacity: 0;
     overscroll-behavior: contain;
     pointer-events: none;
-    transition: opacity 220ms ease, visibility 220ms ease;
+    transition: opacity 220ms ease, visibility 0s linear 220ms;
     visibility: hidden;
   }
 
   .mobile-nav-overlay.is-open {
     opacity: 1;
     pointer-events: auto;
+    transition-delay: 0s;
     visibility: visible;
   }
 

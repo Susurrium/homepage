@@ -1,0 +1,206 @@
+---
+interface TocHeading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: TocHeading[];
+  variant: 'mobile' | 'desktop';
+}
+
+const { headings, variant } = Astro.props;
+const isMobile = variant === 'mobile';
+---
+
+{
+  headings.length > 0 && isMobile && (
+    <details class="article-toc article-toc-mobile" data-article-toc data-article-toc-mobile>
+      <summary class="focus-ring">
+        <span class="toc-title">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path>
+          </svg>
+          文章目录
+        </span>
+        <svg class="toc-chevron" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m6 9 6 6 6-6"></path>
+        </svg>
+      </summary>
+      <nav class="toc-nav" aria-label="文章目录">
+        {headings.map((heading) => (
+          <a
+            href={`#${heading.slug}`}
+            class:list={['toc-link focus-ring', heading.depth === 3 && 'toc-link-nested']}
+            data-article-toc-link
+            data-heading-id={heading.slug}
+          >
+            {heading.text}
+          </a>
+        ))}
+      </nav>
+    </details>
+  )
+}
+
+{
+  headings.length > 0 && !isMobile && (
+    <div class="article-toc article-toc-desktop" data-article-toc data-article-toc-desktop>
+      <p class="toc-title">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path>
+        </svg>
+        文章目录
+      </p>
+      <nav class="toc-nav" aria-label="文章目录">
+        {headings.map((heading) => (
+          <a
+            href={`#${heading.slug}`}
+            class:list={['toc-link focus-ring', heading.depth === 3 && 'toc-link-nested']}
+            data-article-toc-link
+            data-heading-id={heading.slug}
+          >
+            {heading.text}
+          </a>
+        ))}
+      </nav>
+    </div>
+  )
+}
+
+<style>
+  .article-toc {
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
+  }
+
+  .article-toc-mobile {
+    margin-top: 2rem;
+  }
+
+  .article-toc-mobile summary {
+    display: flex;
+    min-height: 3rem;
+    cursor: pointer;
+    list-style: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-radius: 0.5rem;
+    padding: 0.65rem 0.85rem;
+  }
+
+  .article-toc-mobile summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .article-toc-mobile[open] summary {
+    border-bottom: 1px solid var(--line);
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  .toc-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    color: var(--text);
+    font-size: 0.875rem;
+    font-weight: 650;
+  }
+
+  .toc-title svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+
+  .toc-chevron {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: var(--muted);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+    transition: transform 180ms var(--motion-ease-out);
+  }
+
+  .article-toc-mobile[open] .toc-chevron {
+    transform: rotate(180deg);
+  }
+
+  .article-toc-desktop {
+    position: sticky;
+    top: 6rem;
+    max-height: calc(100vh - 7.5rem);
+    overflow-y: auto;
+    padding: 1rem;
+    scrollbar-width: thin;
+  }
+
+  .toc-nav {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .article-toc-mobile .toc-nav {
+    padding: 0.5rem;
+  }
+
+  .article-toc-desktop .toc-nav {
+    margin-top: 0.75rem;
+  }
+
+  .toc-link {
+    display: block;
+    border-left: 2px solid transparent;
+    border-radius: 0.25rem;
+    padding: 0.45rem 0.55rem;
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.4;
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease,
+      color 180ms ease;
+  }
+
+  .toc-link-nested {
+    padding-left: 1.15rem;
+    font-size: 0.8125rem;
+  }
+
+  .toc-link:hover,
+  .toc-link:focus-visible {
+    background: var(--surface-soft);
+    color: var(--text);
+  }
+
+  .toc-link[aria-current='location'] {
+    border-left-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 9%, transparent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toc-chevron,
+    .toc-link {
+      transition: none;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .article-toc-mobile {
+      display: none;
+    }
+  }
+</style>

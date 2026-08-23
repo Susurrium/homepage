@@ -1,31 +1,59 @@
 ---
 import { getCollection } from 'astro:content';
-import PostCard from '../../components/PostCard.astro';
+import type { CollectionEntry } from 'astro:content';
 import PageHero from '../../components/PageHero.astro';
+import Pagination from '../../components/Pagination.astro';
+import PostCard from '../../components/PostCard.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { allTags, published, sortByDate } from '../../lib/content';
+import { allTags, paginate, published, sortByDate, tagPathSegment, tagSlug } from '../../lib/content';
+import { withBase } from '../../lib/url';
 
-export async function getStaticPaths() {
-  const posts = published(await getCollection('blog'));
-  return allTags(posts).map((tag) => ({
-    params: { tag: tag.name },
-    props: { tag: tag.name, posts: posts.filter((post) => post.data.tags.includes(tag.name)) }
-  }));
+interface Props {
+  tag: string;
+  posts: CollectionEntry<'blog'>[];
+  totalPosts: number;
+  totalPages: number;
 }
 
-const { tag, posts } = Astro.props;
-const sortedPosts = sortByDate(posts);
+export async function getStaticPaths() {
+  const posts = sortByDate(published(await getCollection('blog')));
+
+  return allTags(posts).map((tag) => {
+    const page = paginate(
+      posts.filter((post) => post.data.tags.some((postTag) => tagSlug(postTag) === tagSlug(tag.name))),
+      1
+    );
+
+    return {
+      params: { tag: tagSlug(tag.name) },
+      props: {
+        tag: tag.name,
+        posts: page.items,
+        totalPosts: page.totalItems,
+        totalPages: page.totalPages
+      }
+    };
+  });
+}
+
+const { tag, posts, totalPosts, totalPages } = Astro.props;
+const tagBasePath = `/tags/${tagPathSegment(tag)}`;
 ---
 
 <BaseLayout title={`标签：${tag}`} description={`浏览标签 ${tag} 下的文章。`}>
-  <PageHero eyebrow="Tag" title={`#${tag}`} description={`${sortedPosts.length} 篇文章`} />
-  <section class="page-wrap grid gap-4 pb-16">
-    {
-      sortedPosts.map((post, index) => (
+  <PageHero eyebrow="Tag" title={`#${tag}`} description={`${totalPosts} 篇文章`} />
+  <section class="page-wrap pb-16">
+    <div class="mb-6 flex flex-wrap gap-2">
+      <a href={withBase('/tags/')} class="focus-ring chip hover:border-[var(--accent)]">全部标签</a>
+      <a href={withBase('/archives/')} class="focus-ring chip hover:border-[var(--accent)]">年度归档</a>
+    </div>
+    <div class="grid gap-4">
+      {posts.map((post, index) => (
         <div class="reveal" style={`transition-delay: ${(index + 1) * 60}ms`}>
           <PostCard post={post} />
         </div>
-      ))
-    }
+      ))}
+    </div>
+    <Pagination currentPage={1} totalPages={totalPages} basePath={tagBasePath} label={`${tag} 标签文章分页`} />
   </section>
 </BaseLayout>

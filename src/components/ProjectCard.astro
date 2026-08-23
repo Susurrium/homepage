@@ -13,7 +13,11 @@ const { project } = Astro.props;
 <article class="surface group overflow-hidden rounded-lg motion-safe:transition-[transform,border-color,box-shadow] motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--accent)_6%,transparent)]">
   {
     project.data.cover && (
-      <a href={withBase(`/projects/${project.id}/`)} class="focus-ring block overflow-hidden">
+      <a
+        href={withBase(`/projects/${project.id}/`)}
+        class="focus-ring block overflow-hidden"
+        aria-label={`查看项目：${project.data.title}`}
+      >
         <img src={withBase(project.data.cover)} alt="" class="aspect-[16/9] w-full object-cover motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-[1.03]" loading="lazy" />
       </a>
     )

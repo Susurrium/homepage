@@ -2,19 +2,26 @@
 import { getCollection } from 'astro:content';
 import PageHero from '../../components/PageHero.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { allTags, published } from '../../lib/content';
+import { allTags, published, sortByDate, tagPathSegment } from '../../lib/content';
 import { withBase } from '../../lib/url';
 
-const tags = allTags(published(await getCollection('blog')));
+const posts = sortByDate(published(await getCollection('blog')));
+const tags = allTags(posts);
 ---
 
 <BaseLayout title="标签" description="博客文章标签索引。">
-  <PageHero eyebrow="Tags" title="标签" description="按主题浏览文章。" />
-  <section class="page-wrap flex flex-wrap gap-3 pb-16">
-    {tags.length > 0 ? (
-      tags.map((tag, index) => <a href={withBase(`/tags/${encodeURIComponent(tag.name)}/`)} class="reveal chip hover:border-[var(--accent)]" style={`transition-delay: ${(index + 1) * 40}ms`}>#{tag.name} {tag.count}</a>)
-    ) : (
-      <p class="surface w-full rounded-lg p-5 text-sm text-[var(--muted)]">暂无文章标签。</p>
-    )}
+  <PageHero eyebrow="Tags" title="标签" description={`${tags.length} 个标签 · ${posts.length} 篇文章`} />
+  <section class="page-wrap pb-16">
+    <div class="mb-6 flex flex-wrap gap-2">
+      <a href={withBase('/blog/')} class="focus-ring chip hover:border-[var(--accent)]">全部文章</a>
+      <a href={withBase('/archives/')} class="focus-ring chip hover:border-[var(--accent)]">年度归档</a>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      {tags.length > 0 ? (
+        tags.map((tag, index) => <a href={withBase(`/tags/${tagPathSegment(tag.name)}/`)} class="reveal focus-ring chip hover:border-[var(--accent)]" style={`transition-delay: ${(index + 1) * 40}ms`} aria-label={`${tag.name}，${tag.count} 篇文章`}>#{tag.name} <span aria-hidden="true">{tag.count}</span></a>)
+      ) : (
+        <p class="surface w-full rounded-lg p-5 text-sm text-[var(--muted)]">暂无文章标签。</p>
+      )}
+    </div>
   </section>
 </BaseLayout>

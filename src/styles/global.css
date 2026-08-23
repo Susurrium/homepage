@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "katex/dist/katex.min.css";
+@import "remark-github-blockquote-alert/alert.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -198,6 +200,23 @@
     background: var(--code-bg);
     color: var(--code-text);
     line-height: 1.6;
+  }
+
+  .prose .astro-code,
+  .prose .astro-code span {
+    color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
+  }
+
+  .dark .prose .astro-code,
+  .dark .prose .astro-code span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
+
+  .prose .markdown-alert {
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--surface) 78%, transparent);
   }
 
   .prose table {

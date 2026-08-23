@@ -15,6 +15,7 @@ const siteRoot = new URL(basePath, siteOrigin).toString();
 const staticRoutes = [
   '/',
   '/about/',
+  '/archives/',
   '/blog/',
   '/links/',
   '/projects/',
@@ -38,6 +39,15 @@ async function isNonEmptyFile(filePath) {
   try {
     const fileStat = await stat(filePath);
     return fileStat.isFile() && fileStat.size > 0;
+  } catch {
+    return false;
+  }
+}
+
+async function pathExists(filePath) {
+  try {
+    await stat(filePath);
+    return true;
   } catch {
     return false;
   }
@@ -86,7 +96,10 @@ async function listContentFiles(collection) {
 async function listDetailOutputs(collection) {
   const collectionDir = path.join(distDir, collection);
   return (await listFiles(collectionDir)).filter(
-    (filePath) => path.basename(filePath) === 'index.html' && filePath !== path.join(collectionDir, 'index.html')
+    (filePath) =>
+      path.basename(filePath) === 'index.html' &&
+      filePath !== path.join(collectionDir, 'index.html') &&
+      !filePath.includes(`${path.sep}page${path.sep}`)
   );
 }
 
@@ -132,6 +145,13 @@ async function verifyRoutes() {
   );
 
   await requireFile(path.join(distDir, 'robots.txt'), 'robots output');
+  await requireFile(path.join(distDir, '404.html'), 'custom 404 output');
+  await requireFile(path.join(distDir, 'site.webmanifest'), 'web app manifest');
+  await requireFile(path.join(distDir, 'app-icon.svg'), 'web app vector icon');
+  await requireFile(path.join(distDir, 'apple-touch-icon.png'), 'Apple touch icon');
+  await requireFile(path.join(distDir, 'icon-192.png'), '192px web app icon');
+  await requireFile(path.join(distDir, 'icon-512.png'), '512px web app icon');
+  await requireFile(path.join(distDir, 'favicon-32.png'), 'PNG favicon');
   await requireFile(path.join(distDir, 'sitemap-index.xml'), 'sitemap index');
   await requireFile(path.join(distDir, 'sitemap-0.xml'), 'sitemap content');
 }
@@ -153,11 +173,21 @@ async function verifyRss() {
     itemLinks.length > 0 && itemLinks.every((link) => link.startsWith(`${siteRoot}blog/`)),
     `RSS feed: every item link should start with ${siteRoot}blog/`
   );
+  passOrFail(!rss.includes('undefined'), 'RSS feed: output should not contain undefined values');
+  passOrFail(
+    itemBlocks.every((item) => item.includes('<content:encoded>')),
+    'RSS feed: every item should contain rendered article content'
+  );
 }
 
 async function verifyPagefind() {
   const pagefindDir = path.join(distDir, 'pagefind');
-  const requiredAssets = ['pagefind.js', 'pagefind-ui.js', 'pagefind-ui.css', 'pagefind-entry.json'];
+  const requiredAssets = [
+    'pagefind.js',
+    'pagefind-component-ui.js',
+    'pagefind-component-ui.css',
+    'pagefind-entry.json'
+  ];
 
   for (const asset of requiredAssets) {
     await requireFile(path.join(pagefindDir, asset), `Pagefind asset ${asset}`);
@@ -236,7 +266,10 @@ async function verifyNoPlaceholders() {
 async function verifyDeploymentMetadata() {
   const indexHtml = await readFile(routeOutput('/'), 'utf8');
   const searchHtml = await readFile(routeOutput('/search/'), 'utf8');
-  const signatureLabHtml = await readFile(routeOutput('/signature-lab/'), 'utf8');
+  const blogOutputs = await listDetailOutputs('blog');
+  const projectOutputs = await listDetailOutputs('projects');
+  const firstArticleHtml = blogOutputs.length > 0 ? await readFile(blogOutputs[0], 'utf8') : '';
+  const firstProjectHtml = projectOutputs.length > 0 ? await readFile(projectOutputs[0], 'utf8') : '';
   const robots = await readFile(path.join(distDir, 'robots.txt'), 'utf8');
   const sitemap = await readFile(path.join(distDir, 'sitemap-0.xml'), 'utf8');
   const socialImageUrl = `${siteRoot}images/og.png`;
@@ -245,12 +278,16 @@ async function verifyDeploymentMetadata() {
     [indexHtml.includes(`<link rel="canonical" href="${siteRoot}"`), `home canonical should be ${siteRoot}`],
     [indexHtml.includes(`<meta property="og:image" content="${socialImageUrl}"`), `Open Graph image should be ${socialImageUrl}`],
     [indexHtml.includes(`<meta name="twitter:image" content="${socialImageUrl}"`), `Twitter image should be ${socialImageUrl}`],
+    [indexHtml.includes(`href="${basePath}site.webmanifest"`), 'home should link the web app manifest'],
     [indexHtml.includes(`href="${basePath}blog/"`), `home links should use base path ${basePath}`],
-    [searchHtml.includes(`${basePath}pagefind/pagefind-ui.js`), 'search UI script should use the deployment base path'],
+    [searchHtml.includes(`${basePath}pagefind/pagefind-component-ui.js`), 'search Component UI should use the deployment base path'],
     [robots.includes(`Sitemap: ${siteRoot}sitemap-index.xml`), 'robots.txt should point to the deployed sitemap'],
     [sitemap.includes(`<loc>${siteRoot}</loc>`), 'sitemap should include the deployed site root'],
-    [!sitemap.includes('/signature-lab/'), 'signature lab should be excluded from the sitemap'],
-    [signatureLabHtml.includes('name="robots" content="noindex, nofollow"'), 'signature lab should be noindex']
+    [sitemap.includes(`${siteRoot}archives/`), 'sitemap should include the article archive'],
+    [!sitemap.includes('/signature-lab/'), 'signature lab should not be published'],
+    [firstArticleHtml.includes('property="article:published_time"'), 'articles should expose published time metadata'],
+    [firstArticleHtml.includes('type="application/ld+json"'), 'articles should expose JSON-LD metadata'],
+    [!/<meta property="og:image" content="[^"]+\.svg(?:[?#][^"]*)?"/i.test(firstProjectHtml), 'project social images should not use SVG']
   ];
 
   for (const [passed, message] of expectations) {
@@ -267,15 +304,19 @@ async function verifyDeploymentMetadata() {
   for (const htmlPath of astroHtmlFiles) {
     const html = await readFile(htmlPath, 'utf8');
     const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+    const isNoindex = html.includes('name="robots" content="noindex');
     const relativeDirectory = path.relative(distDir, path.dirname(htmlPath));
-    const encodedRoute = relativeDirectory
-      .split(path.sep)
-      .filter(Boolean)
-      .map(encodeURIComponent)
-      .join('/');
+    const encodedRoute = htmlPath === path.join(distDir, '404.html')
+      ? '404'
+      : relativeDirectory
+          .split(path.sep)
+          .filter(Boolean)
+          .map(encodeURIComponent)
+          .join('/');
     const expectedCanonical = new URL(encodedRoute ? `${encodedRoute}/` : '', siteRoot).toString();
-    if (canonical !== expectedCanonical) {
-      invalidCanonicals.push(`${relativePath(htmlPath)} -> ${canonical ?? 'missing'} (expected ${expectedCanonical})`);
+    if ((isNoindex && canonical) || (!isNoindex && canonical !== expectedCanonical)) {
+      const expected = isNoindex ? 'omitted on noindex pages' : expectedCanonical;
+      invalidCanonicals.push(`${relativePath(htmlPath)} -> ${canonical ?? 'missing'} (expected ${expected})`);
     }
 
     for (const match of html.matchAll(/(?:href|src)="(\/[^"]*)"/g)) {
@@ -295,20 +336,17 @@ async function verifyDeploymentMetadata() {
   await requireFile(path.join(distDir, 'images', 'og.png'), 'social sharing image');
 }
 
-async function verifyArchivedSignature() {
-  const exportPath = path.join(distDir, 'signature-candidates', 'generator-export.html');
-  if (!(await requireFile(exportPath, 'signature generator archive'))) return;
-
-  const html = await readFile(exportPath, 'utf8');
-  const expectations = [
-    [!html.includes('<\\/script>'), 'signature generator archive should not contain escaped script terminators'],
-    [(html.match(/<\/script>/g)?.length ?? 0) === 2, 'signature generator archive should contain two closed scripts'],
-    [html.includes('name="robots" content="noindex, nofollow"'), 'signature generator archive should be noindex']
+async function verifyProductionAssets() {
+  const leakedPaths = [
+    path.join(distDir, 'signature-lab', 'index.html'),
+    path.join(distDir, 'signature-candidates')
   ];
 
-  for (const [passed, message] of expectations) {
-    if (passed) passedChecks += 1;
-    else failures.push(`signature generator archive: ${message}`);
+  for (const leakedPath of leakedPaths) {
+    passOrFail(
+      !(await pathExists(leakedPath)),
+      `production assets: archived signature lab leaked into ${relativePath(leakedPath)}`
+    );
   }
 }
 
@@ -333,7 +371,7 @@ async function main() {
   await verifyPagefind();
   await verifyNoPlaceholders();
   await verifyDeploymentMetadata();
-  await verifyArchivedSignature();
+  await verifyProductionAssets();
 
   if (failures.length > 0) {
     console.error(`Build verification failed with ${failures.length} problem(s):`);

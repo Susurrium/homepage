@@ -11,22 +11,32 @@
     "build:astro": "astro build",
     "check": "astro check",
     "verify:build": "node scripts/verify-build.mjs",
-    "test": "npm run check && npm run build && npm run verify:build",
+    "test:static": "npm run check && npm run build && npm run verify:build",
+    "test:e2e": "playwright test",
+    "test": "npm run test:static && npm run test:e2e",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "^7.2.4",
+    "@astrojs/mdx": "^7.0.7",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.2",
     "@lucide/astro": "^1.31.0",
     "@tailwindcss/vite": "^4.3.0",
-    "astro": "^7.2.0",
+    "astro": "^7.2.4",
     "clsx": "^2.1.1",
+    "katex": "^0.18.4",
     "pagefind": "^1.5.2",
+    "rehype-katex": "^7.0.1",
+    "remark-github-blockquote-alert": "^2.1.0",
+    "remark-math": "^6.0.0",
     "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
     "typescript": "^6.0.3"
   }
 }

@@ -1,0 +1,77 @@
+---
+import { ArrowLeft, ArrowRight } from '@lucide/astro';
+import { withBase } from '../lib/url';
+
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  basePath: string;
+  label?: string;
+}
+
+const { currentPage, totalPages, basePath, label = '文章分页' } = Astro.props;
+const normalizedBasePath = `/${basePath.replace(/^\/+|\/+$/g, '')}`;
+const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
+const pageHref = (page: number) =>
+  withBase(page === 1 ? `${normalizedBasePath}/` : `${normalizedBasePath}/page/${page}/`);
+---
+
+{
+  totalPages > 1 && (
+    <nav class="mt-8 flex flex-wrap items-center justify-center gap-2" aria-label={label}>
+      {currentPage > 1 ? (
+        <a
+          href={pageHref(currentPage - 1)}
+          class="focus-ring chip min-w-24 justify-center hover:border-[var(--accent)]"
+          rel="prev"
+        >
+          <ArrowLeft class="h-4 w-4" aria-hidden="true" />
+          上一页
+        </a>
+      ) : (
+        <span class="chip min-w-24 justify-center opacity-50" aria-disabled="true">
+          <ArrowLeft class="h-4 w-4" aria-hidden="true" />
+          上一页
+        </span>
+      )}
+
+      <div class="flex flex-wrap justify-center gap-2">
+        {pages.map((page) =>
+          page === currentPage ? (
+            <span
+              class="inline-flex h-8 min-w-8 items-center justify-center rounded-full border border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_10%,var(--surface))] px-2 text-sm font-medium text-[var(--text)]"
+              aria-current="page"
+              aria-label={`第 ${page} 页，当前页`}
+            >
+              {page}
+            </span>
+          ) : (
+            <a
+              href={pageHref(page)}
+              class="focus-ring chip min-w-8 justify-center px-2 hover:border-[var(--accent)]"
+              aria-label={`前往第 ${page} 页`}
+            >
+              {page}
+            </a>
+          )
+        )}
+      </div>
+
+      {currentPage < totalPages ? (
+        <a
+          href={pageHref(currentPage + 1)}
+          class="focus-ring chip min-w-24 justify-center hover:border-[var(--accent)]"
+          rel="next"
+        >
+          下一页
+          <ArrowRight class="h-4 w-4" aria-hidden="true" />
+        </a>
+      ) : (
+        <span class="chip min-w-24 justify-center opacity-50" aria-disabled="true">
+          下一页
+          <ArrowRight class="h-4 w-4" aria-hidden="true" />
+        </span>
+      )}
+    </nav>
+  )
+}

@@ -1,26 +1,30 @@
 ---
 import { getCollection } from 'astro:content';
-import PostCard from '../../components/PostCard.astro';
 import PageHero from '../../components/PageHero.astro';
+import Pagination from '../../components/Pagination.astro';
+import PostCard from '../../components/PostCard.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { allTags, published, sortByDate } from '../../lib/content';
+import { allTags, paginate, published, sortByDate, tagPathSegment } from '../../lib/content';
 import { withBase } from '../../lib/url';
 
-const posts = sortByDate(published(await getCollection('blog')));
-const tags = allTags(posts);
+const allPosts = sortByDate(published(await getCollection('blog')));
+const tags = allTags(allPosts);
+const page = paginate(allPosts, 1);
 ---
 
 <BaseLayout title="博客" description="技术笔记、项目复盘、阅读记录与长期写作。">
   <PageHero eyebrow="Blog" title="博客" description="这里用于沉淀学习笔记、工程实践、项目复盘和阅读记录。文章全部使用 Markdown 管理，适合长期维护。" />
 
   <section class="page-wrap pb-16">
-    <div class="mb-6 flex flex-wrap gap-2">
-      {tags.map((tag) => <a href={withBase(`/tags/${encodeURIComponent(tag.name)}/`)} class="chip hover:border-[var(--accent)]">#{tag.name} {tag.count}</a>)}
+    <div class="mb-6 flex flex-wrap items-center gap-2">
+      {tags.map((tag) => <a href={withBase(`/tags/${tagPathSegment(tag.name)}/`)} class="focus-ring chip hover:border-[var(--accent)]">#{tag.name} {tag.count}</a>)}
+      <a href={withBase('/tags/')} class="focus-ring chip hover:border-[var(--accent)]">全部标签</a>
+      <a href={withBase('/archives/')} class="focus-ring chip hover:border-[var(--accent)]">年度归档</a>
     </div>
-    {posts.length > 0 ? (
+    {page.items.length > 0 ? (
       <div class="grid gap-4">
         {
-          posts.map((post, index) => (
+          page.items.map((post, index) => (
             <div class="reveal" style={`transition-delay: ${(index + 1) * 60}ms`}>
               <PostCard post={post} />
             </div>
@@ -30,5 +34,6 @@ const tags = allTags(posts);
     ) : (
       <p class="surface rounded-lg p-5 text-sm text-[var(--muted)]">暂无已发布文章。</p>
     )}
+    <Pagination currentPage={page.currentPage} totalPages={page.totalPages} basePath="/blog" />
   </section>
 </BaseLayout>

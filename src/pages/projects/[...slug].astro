@@ -19,9 +19,12 @@ interface Props {
 
 const { project } = Astro.props;
 const { Content } = await render(project);
+const socialImage = project.data.cover && !/\.svg(?:$|[?#])/i.test(project.data.cover)
+  ? project.data.cover
+  : '/images/og.png';
 ---
 
-<BaseLayout title={project.data.title} description={project.data.description} image={project.data.cover ?? '/images/og.png'}>
+<BaseLayout title={project.data.title} description={project.data.description} image={socialImage}>
   <article class="page-wrap max-w-4xl pb-16 pt-10">
     <a href={withBase('/projects/')} class="focus-ring animate-fade-up inline-flex items-center gap-2 rounded-md text-sm text-[var(--muted)] transition hover:text-[var(--accent)]">
       <ArrowLeft class="h-4 w-4" aria-hidden="true" />

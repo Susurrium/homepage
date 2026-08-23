@@ -1,0 +1,22 @@
+---
+import { getCollection } from 'astro:content';
+import ArchiveList from '../../components/ArchiveList.astro';
+import PageHero from '../../components/PageHero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { published, sortByDate } from '../../lib/content';
+import { withBase } from '../../lib/url';
+
+const posts = sortByDate(published(await getCollection('blog')));
+const yearCount = new Set(posts.map((post) => post.data.date.getFullYear())).size;
+---
+
+<BaseLayout title="文章归档" description="按年份浏览全部博客文章。">
+  <PageHero eyebrow="Archives" title="文章归档" description={`${posts.length} 篇文章 · ${yearCount} 个年份`} />
+  <section class="page-wrap pb-16">
+    <div class="mb-8 flex flex-wrap gap-2">
+      <a href={withBase('/blog/')} class="focus-ring chip hover:border-[var(--accent)]">全部文章</a>
+      <a href={withBase('/tags/')} class="focus-ring chip hover:border-[var(--accent)]">全部标签</a>
+    </div>
+    <ArchiveList posts={posts} />
+  </section>
+</BaseLayout>

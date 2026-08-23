@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { withBase } from '../lib/url';
 
 const pagefindPath = withBase('/pagefind/');
+const basePath = withBase('/');
 ---
 
 <BaseLayout title="搜索" description="搜索本站文章、项目和页面。">
@@ -11,39 +12,62 @@ const pagefindPath = withBase('/pagefind/');
 
   <section class="page-wrap pb-16">
     <div class="surface animate-fade-up rounded-lg p-5">
-      <div id="search"></div>
+      <div class="pagefind-component-shell" data-search-shell>
+        <pagefind-config bundle-path={pagefindPath} base-url={basePath}></pagefind-config>
+        <pagefind-input placeholder="搜索文章、项目、标签……"></pagefind-input>
+        <pagefind-summary></pagefind-summary>
+        <pagefind-results></pagefind-results>
+      </div>
+      <p class="hidden text-sm text-[var(--muted)]" data-search-unavailable>
+        当前还没有搜索索引。请先运行 <code>npm run build</code>，再使用 <code>npm run preview</code> 查看搜索效果。
+      </p>
       <noscript>
         <p class="text-sm text-[var(--muted)]">搜索需要启用 JavaScript。</p>
       </noscript>
     </div>
   </section>
 
-  <link href={`${pagefindPath}pagefind-ui.css`} rel="stylesheet" />
-  <script is:inline src={`${pagefindPath}pagefind-ui.js`}></script>
-  <script is:inline define:vars={{ pagefindPath }}>
-    window.addEventListener('DOMContentLoaded', () => {
-      if (!window.PagefindUI) {
-        const root = document.getElementById('search');
-        if (root) root.innerHTML = '<p class="text-sm text-[var(--muted)]">当前还没有搜索索引。请运行 npm run build 后使用 npm run preview 查看搜索效果。</p>';
-        return;
-      }
+  <link href={`${pagefindPath}pagefind-component-ui.css`} rel="stylesheet" />
+  <script is:inline type="module" src={`${pagefindPath}pagefind-component-ui.js`}></script>
+  <script>
+    window.addEventListener('load', () => {
+      window.setTimeout(() => {
+        if (customElements.get('pagefind-input')) return;
 
-      new window.PagefindUI({
-        element: '#search',
-        bundlePath: pagefindPath,
-        showImages: false,
-        translations: {
-          placeholder: '搜索文章、项目、标签...',
-          clear_search: '清除',
-          load_more: '加载更多',
-          search_label: '搜索本站',
-          filters_label: '筛选',
-          zero_results: '没有找到结果',
-          many_results: '[COUNT] 个结果',
-          one_result: '[COUNT] 个结果',
-          searching: '搜索中...'
-        }
-      });
+        document.querySelector<HTMLElement>('[data-search-shell]')?.classList.add('hidden');
+        document.querySelector<HTMLElement>('[data-search-unavailable]')?.classList.remove('hidden');
+      }, 800);
     });
   </script>
 </BaseLayout>
+
+<style>
+  .pagefind-component-shell {
+    --pagefind-ui-primary: var(--accent);
+    --pagefind-ui-text: var(--text);
+    --pagefind-ui-background: var(--surface);
+    --pagefind-ui-border: var(--line);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 0.5rem;
+    --pagefind-ui-font: inherit;
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .pagefind-component-shell > pagefind-input,
+  .pagefind-component-shell > pagefind-summary,
+  .pagefind-component-shell > pagefind-results {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  :global(.pagefind-component-shell :is(.pf-input-wrapper, .pf-input, .pf-summary, .pf-results, .pf-result, .pf-result-card, .pf-result-content, .pf-heading-chips, .pf-heading-chip)) {
+    min-width: 0;
+    max-width: 100%;
+  }
+</style>
